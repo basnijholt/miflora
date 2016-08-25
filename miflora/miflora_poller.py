@@ -39,6 +39,7 @@ def read_ble(mac, handle, retries=3):
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
             result = subprocess.check_output(cmd, shell=True).decode("utf-8")
+            LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
             res = re.search("( [0-9a-fA-F][0-9a-fA-F])+$", result)
             if res:
