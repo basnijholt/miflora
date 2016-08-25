@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='miflora',
-      version='0.1',
+      version='0.1.1',
       description='Library to read data from Mi Flora sensor',
       url='https://github.com/open-homeautomation/miflora',
       author='Daniel Matuschek',
@@ -17,6 +17,5 @@ setup(name='miflora',
           'Programming Language :: Python :: 3.5'
       ],
       packages=find_packages(),
-      install_requires=['gattlib>=0.20150805'],
       keywords='plant sensor bluetooth low-energy ble',
       zip_safe=False)
