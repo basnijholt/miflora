@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from threading import Lock
 import re
 import subprocess
+import logging
 
 #from gattlib import GATTRequester
 
@@ -17,6 +18,8 @@ MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
 MI_MOISTURE = "moisture"
 MI_FERTILITY = "fertility"
+
+LOGGER = logging.getLogger(__name__)
 
 
 def read_ble(mac, handle, retries=3):
@@ -31,6 +34,7 @@ def read_ble(mac, handle, retries=3):
         return int(hexstring, 16)
 
     attempt = 0
+    delay = 10
     while (attempt < retries):
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
@@ -40,10 +44,12 @@ def read_ble(mac, handle, retries=3):
             if res:
                 return list(map(fromhex, res.group(0).split()))
 
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
+            LOGGER.debug("Error %s from gatttool (%s)", e.returncode, e.output)
             pass
 
         attempt += 1
+        delay *= 2
 
     return None
 
