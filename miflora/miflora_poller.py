@@ -1,11 +1,15 @@
-'''
-Created on Aug 24, 2016
+""""
+Read data from Mi Flora plant sensor.
 
-@author: matuschd
-'''
+Reading from the sensor is handled by the command line tool "gatttool" that
+is part of bluez on Linux.
+No other operating systems are supported at the moment
+"""
 
 from datetime import datetime, timedelta
 from threading import Lock
+import re
+import subprocess
 
 #from gattlib import GATTRequester
 
@@ -13,6 +17,38 @@ MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
 MI_MOISTURE = "moisture"
 MI_FERTILITY = "fertility"
+
+
+def read_ble(mac, handle, retries=3):
+    """
+    Read from a BLE address
+
+    @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
+    @param: handle - BLE characteristics handle in format 0xXX
+    """
+
+    def fromhex(hexstring):
+        return int(hexstring, 16)
+
+    attempt = 0
+    while (attempt < retries):
+        try:
+            result = subprocess.check_output(["gatttool",
+                                              "--device=".format(mac),
+                                              "--char-read",
+                                              "-a".format(handle)],
+                                             shell=True).decode("utf-8")
+            # Parse the output
+            res = re.search("( [0-9a-fA-F][0-9a-fA-F])+$", result)
+            if res:
+                return list(map(fromhex, res.group(0).split()))
+
+        except subprocess.CalledProcessError:
+            pass
+
+        attempt += 1
+
+    return None
 
 
 class MiFloraPoller(object):
@@ -34,20 +70,7 @@ class MiFloraPoller(object):
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
 
-    def get_name(self):
-        """
-        Return the name of the sensor.
-
-        Default name is "Flower mate"
-        """
-        #        req = GATTRequester(self.mac)
-        req = None
-        MiFloraPoller.lock.aqcuire()
-        byteval = req.read_by_uuid("00002a00-0000-1000-8000-00805f9b34fb")
-        MiFloraPoller.lock.release()
-        return str(byteval, 'utf-8')
-
-    def get_value(self, parameter, read_cached=True):
+    def parameter_value(self, parameter, read_cached=True):
         """
         Return a value of one of the monitored paramaters.
 
@@ -58,22 +81,17 @@ class MiFloraPoller(object):
         """
 
         # Check if the cache shouldn't be used
-        if read_cached is False | \
-                self._cache is None | \
-                self._last_read is None | \
-                datetime.now() - self._cache_timeout > self._last_read:
+        if (read_cached is False) or (self._cache is None) or \
+                (self._last_read is None) or \
+                (datetime.now() - self._cache_timeout > self._last_read):
 
-            # TODO: read data from bluetooth
-
-            #            req = GATTRequester(self.mac)
-            req = None
-            MiFloraPoller.lock.aqcuire()
-            self._cache = \
-                req.read_by_uuid("00001a01-0000-1000-8000-00805f9b34fb")
+            MiFloraPoller.lock.acquire()
+            self._cache = read_ble(self._mac, "0x35")
+            print(self._cache)
             MiFloraPoller.lock.release()
             self._last_read = datetime.now()
 
-        if len(self._cache) == 16:
+        if self._cache and (len(self._cache) == 16):
             return self._parse_data()[parameter]
         else:
             raise IOError("Could not read data from Mi Flora sensor %s",
