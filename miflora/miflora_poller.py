@@ -80,6 +80,12 @@ class MiFloraPoller(object):
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
 
+    def name(self):
+        MiFloraPoller.lock.acquire()
+        name = read_ble(self._mac, "0x35")
+        MiFloraPoller.lock.release()
+        return ''.join(chr(n) for n in name)
+
     def parameter_value(self, parameter, read_cached=True):
         """
         Return a value of one of the monitored paramaters.
