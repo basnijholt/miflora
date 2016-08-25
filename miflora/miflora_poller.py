@@ -82,7 +82,7 @@ class MiFloraPoller(object):
 
     def name(self):
         MiFloraPoller.lock.acquire()
-        name = read_ble(self._mac, "0x35")
+        name = read_ble(self._mac, "0x03")
         MiFloraPoller.lock.release()
         return ''.join(chr(n) for n in name)
 
