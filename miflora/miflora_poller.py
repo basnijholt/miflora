@@ -54,8 +54,9 @@ def read_ble(mac, handle, retries=3):
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
-        time.sleep(delay)
-        delay *= 2
+        if (attempt < retries):
+            time.sleep(delay)
+            delay *= 2
 
     return None
 
