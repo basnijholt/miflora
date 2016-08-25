@@ -11,6 +11,7 @@ from threading import Lock
 import re
 import subprocess
 import logging
+import time
 
 #from gattlib import GATTRequester
 
@@ -38,10 +39,12 @@ def read_ble(mac, handle, retries=3):
     while (attempt < retries):
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
-            result = subprocess.check_output(cmd, shell=True).decode("utf-8")
+            result = subprocess.check_output(cmd,
+                                             shell=True
+                                             ).decode("utf-8").strip(' \n\t')
             LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
-            res = re.search("( [0-9a-fA-F][0-9a-fA-F])+$", result)
+            res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
             if res:
                 return list(map(fromhex, res.group(0).split()))
 
@@ -50,6 +53,8 @@ def read_ble(mac, handle, retries=3):
             pass
 
         attempt += 1
+        LOGGER.debug("Waiting for %s seconds before retrying", delay)
+        time.sleep(delay)
         delay *= 2
 
     return None
