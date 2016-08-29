@@ -102,7 +102,6 @@ class MiFloraPoller(object):
 
             MiFloraPoller.lock.acquire()
             self._cache = read_ble(self._mac, "0x35")
-            print(self._cache)
             MiFloraPoller.lock.release()
             self._last_read = datetime.now()
 
