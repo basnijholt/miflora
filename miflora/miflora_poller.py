@@ -18,7 +18,7 @@ import time
 MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
 MI_MOISTURE = "moisture"
-MI_FERTILITY = "fertility"
+MI_CONDUCTIVITY = "conductivity"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,30 +31,26 @@ def read_ble(mac, handle, retries=3):
     @param: handle - BLE characteristics handle in format 0xXX
     """
 
-    def fromhex(hexstring):
-        return int(hexstring, 16)
-
     attempt = 0
     delay = 10
-    while (attempt < retries):
+    while attempt < retries:
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
-            result = subprocess.check_output(cmd,
-                                             shell=True
-                                             ).decode("utf-8").strip(' \n\t')
+            result = subprocess.check_output(cmd, shell=True)
+            result = result.decode("utf-8").strip(' \n\t')
             LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
             res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
             if res:
-                return list(map(fromhex, res.group(0).split()))
+                return [int(x, 16) for x in res.group(0).split()]
 
-        except subprocess.CalledProcessError as e:
-            LOGGER.debug("Error %s from gatttool (%s)", e.returncode, e.output)
-            pass
+        except subprocess.CalledProcessError as err:
+            LOGGER.debug("Error %s from gatttool (%s)",
+                         err.returncode, err.output)
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
-        if (attempt < retries):
+        if attempt < retries:
             time.sleep(delay)
             delay *= 2
 
@@ -81,6 +77,9 @@ class MiFloraPoller(object):
         self._last_read = None
 
     def name(self):
+        """
+        Return the name of the sensor.
+        """
         MiFloraPoller.lock.acquire()
         name = read_ble(self._mac, "0x03")
         MiFloraPoller.lock.release()
@@ -119,5 +118,5 @@ class MiFloraPoller(object):
         res[MI_TEMPERATURE] = float(data[1] * 256 + data[0]) / 10
         res[MI_MOISTURE] = data[7]
         res[MI_LIGHT] = data[4] * 256 + data[3]
-        res[MI_FERTILITY] = data[9] * 256 + data[8]
+        res[MI_CONDUCTIVITY] = data[9] * 256 + data[8]
         return res
