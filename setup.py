@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='miflora',
-      version='0.1.5',
+      version='0.1.6',
       description='Library to read data from Mi Flora sensor',
       url='https://github.com/open-homeautomation/miflora',
       author='Daniel Matuschek',
