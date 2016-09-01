@@ -23,9 +23,6 @@ MI_CONDUCTIVITY = "conductivity"
 LOGGER = logging.getLogger(__name__)
 
 
-LOCK = Lock()
-
-
 def read_ble(mac, handle, retries=3, timeout=30):
     """
     Read from a BLE address
@@ -40,11 +37,9 @@ def read_ble(mac, handle, retries=3, timeout=30):
     while attempt < retries:
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
-            LOCK.acquire()
             result = subprocess.check_output(cmd,
                                              shell=True,
                                              timeout=timeout)
-            LOCK.release()
             result = result.decode("utf-8").strip(' \n\t')
             LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
@@ -55,6 +50,8 @@ def read_ble(mac, handle, retries=3, timeout=30):
         except subprocess.CalledProcessError as err:
             LOGGER.debug("Error %s from gatttool (%s)",
                          err.returncode, err.output)
+        except subprocess.TimeoutExpired:
+            LOGGER.info("Timeout while waiting for gatttool output")
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
@@ -70,7 +67,9 @@ class MiFloraPoller(object):
     A class to read data from Mi Flora plant sensors.
     """
 
-    def __init__(self, mac, cache_timeout=600):
+    lock = Lock()
+
+    def __init__(self, mac, cache_timeout=600, retries=4):
         """
         Initialize a Mi Flora Poller for the given MAC address.
         """
@@ -79,12 +78,15 @@ class MiFloraPoller(object):
         self._cache = None
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
+        self.retries = retries
 
     def name(self):
         """
         Return the name of the sensor.
         """
-        name = read_ble(self._mac, "0x03")
+        MiFloraPoller.lock.acquire()
+        name = read_ble(self._mac, "0x03", retries=self.retries)
+        MiFloraPoller.lock.release()
         return ''.join(chr(n) for n in name)
 
     def parameter_value(self, parameter, read_cached=True):
@@ -97,13 +99,26 @@ class MiFloraPoller(object):
         This behaviour can be overwritten by the "read_cached" parameter.
         """
 
+        if MiFloraPoller.lock.acquire(False):
+            MiFloraPoller.lock.release()
+        else:
+            LOGGER.debug("BLE reading is locked, waiting")
+
+        LOGGER.debug("Acquiring lock")
+        MiFloraPoller.lock.acquire()
+
         # Check if the cache shouldn't be used
         if (read_cached is False) or (self._cache is None) or \
                 (self._last_read is None) or \
                 (datetime.now() - self._cache_timeout > self._last_read):
 
-            self._cache = read_ble(self._mac, "0x35")
+            self._cache = read_ble(self._mac, "0x35", retries=self.retries)
             self._last_read = datetime.now()
+        else:
+            LOGGER.debug("Using cache")
+
+        MiFloraPoller.lock.release()
+        LOGGER.debug("Lock released")
 
         if self._cache and (len(self._cache) == 16):
             return self._parse_data()[parameter]
