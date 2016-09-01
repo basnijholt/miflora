@@ -23,12 +23,16 @@ MI_CONDUCTIVITY = "conductivity"
 LOGGER = logging.getLogger(__name__)
 
 
-def read_ble(mac, handle, retries=3):
+LOCK = Lock()
+
+
+def read_ble(mac, handle, retries=3, timeout=30):
     """
     Read from a BLE address
 
     @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
     @param: handle - BLE characteristics handle in format 0xXX
+    @param: timeout - timeout in seconds
     """
 
     attempt = 0
@@ -36,7 +40,11 @@ def read_ble(mac, handle, retries=3):
     while attempt < retries:
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
-            result = subprocess.check_output(cmd, shell=True)
+            LOCK.acquire()
+            result = subprocess.check_output(cmd,
+                                             shell=True,
+                                             timeout=timeout)
+            LOCK.release()
             result = result.decode("utf-8").strip(' \n\t')
             LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
@@ -62,10 +70,6 @@ class MiFloraPoller(object):
     A class to read data from Mi Flora plant sensors.
     """
 
-    # Lock on class to make sure multiple MiFloraPollers do not poll in
-    # parallel
-    lock = Lock()
-
     def __init__(self, mac, cache_timeout=600):
         """
         Initialize a Mi Flora Poller for the given MAC address.
@@ -80,9 +84,7 @@ class MiFloraPoller(object):
         """
         Return the name of the sensor.
         """
-        MiFloraPoller.lock.acquire()
         name = read_ble(self._mac, "0x03")
-        MiFloraPoller.lock.release()
         return ''.join(chr(n) for n in name)
 
     def parameter_value(self, parameter, read_cached=True):
@@ -100,9 +102,7 @@ class MiFloraPoller(object):
                 (self._last_read is None) or \
                 (datetime.now() - self._cache_timeout > self._last_read):
 
-            MiFloraPoller.lock.acquire()
             self._cache = read_ble(self._mac, "0x35")
-            MiFloraPoller.lock.release()
             self._last_read = datetime.now()
 
         if self._cache and (len(self._cache) == 16):
