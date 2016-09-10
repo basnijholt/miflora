@@ -82,6 +82,7 @@ class MiFloraPoller(object):
         self._last_read = None
         self.retries = retries
         self.ble_timeout = 10
+        self.lock = Lock()
 
     def name(self):
         """
@@ -91,6 +92,18 @@ class MiFloraPoller(object):
                         retries=self.retries,
                         timeout=self.ble_timeout)
         return ''.join(chr(n) for n in name)
+
+    def fill_cache(self):
+        self._cache = read_ble(self._mac,
+                               "0x35",
+                               retries=self.retries,
+                               timeout=self.ble_timeout)
+        if self._cache is not None:
+            self._last_read = datetime.now()
+        else:
+            # If a sensor doesn't work, wait at least 5 minutes before retrying
+            self._last_read = datetime.now() - self._cache_timeout + \
+                timedelta(seconds=300)
 
     def parameter_value(self, parameter, read_cached=True):
         """
@@ -103,17 +116,15 @@ class MiFloraPoller(object):
         """
 
         # Check if the cache shouldn't be used
-        if (read_cached is False) or (self._cache is None) or \
-                (self._last_read is None) or \
-                (datetime.now() - self._cache_timeout > self._last_read):
 
-            self._cache = read_ble(self._mac,
-                                   "0x35",
-                                   retries=self.retries,
-                                   timeout=self.ble_timeout)
-            self._last_read = datetime.now()
-        else:
-            LOGGER.debug("Using cache")
+        # Use the lock to make sure the cache isn't updated multiple times
+        with self.lock:
+            if (read_cached is False) or \
+                    (self._last_read is None) or \
+                    (datetime.now() - self._cache_timeout > self._last_read):
+                self.fill_cache()
+            else:
+                LOGGER.debug("Using cache")
 
         if self._cache and (len(self._cache) == 16):
             return self._parse_data()[parameter]
