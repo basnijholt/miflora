@@ -7,7 +7,7 @@ No other operating systems are supported at the moment
 """
 
 from datetime import datetime, timedelta
-from threading import Lock, Timer
+from threading import Lock, Timer, current_thread
 import re
 import subprocess
 import logging
@@ -42,9 +42,13 @@ def read_ble(mac, handle, retries=3, timeout=20):
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
             with LOCK:
+                LOGGER.debug("Created lock in thread %s",
+                             current_thread())
                 result = subprocess.check_output(cmd,
                                                  shell=True,
                                                  timeout=timeout)
+            LOGGER.debug("Released lock in thread %s", current_thread())
+
             result = result.decode("utf-8").strip(' \n\t')
             LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
