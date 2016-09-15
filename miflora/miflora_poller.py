@@ -7,11 +7,12 @@ No other operating systems are supported at the moment
 """
 
 from datetime import datetime, timedelta
-from threading import Lock
+from threading import Lock, Timer
 import re
 import subprocess
 import logging
 import time
+
 
 #from gattlib import GATTRequester
 
@@ -98,12 +99,15 @@ class MiFloraPoller(object):
                                "0x35",
                                retries=self.retries,
                                timeout=self.ble_timeout)
+        self._check_data()
         if self._cache is not None:
             self._last_read = datetime.now()
         else:
             # If a sensor doesn't work, wait at least 5 minutes before retrying
             self._last_read = datetime.now() - self._cache_timeout + \
                 timedelta(seconds=300)
+            # Automatically retry after 5 minutes
+            Timer(300, self.fill_cache).start()
 
     def parameter_value(self, parameter, read_cached=True):
         """
@@ -131,6 +135,13 @@ class MiFloraPoller(object):
         else:
             raise IOError("Could not read data from Mi Flora sensor %s",
                           self._mac)
+
+    def _check_data(self):
+        sum = 0
+        for i in self._cache:
+            sum += i
+        if sum == 0:
+            self._cache = None
 
     def _parse_data(self):
         data = self._cache
