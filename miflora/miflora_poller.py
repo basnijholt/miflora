@@ -8,6 +8,7 @@ No other operating systems are supported at the moment
 
 from datetime import datetime, timedelta
 from threading import Lock, Timer, current_thread
+from random import randint
 import re
 import subprocess
 import logging
@@ -38,6 +39,8 @@ def read_ble(mac, handle, retries=3, timeout=20):
     global LOCK
     attempt = 0
     delay = 10
+    LOGGER.debug("Enter read_ble (%s)", current_thread())
+
     while attempt <= retries:
         try:
             cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
@@ -54,13 +57,16 @@ def read_ble(mac, handle, retries=3, timeout=20):
             # Parse the output
             res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
             if res:
+                LOGGER.debug(
+                    "Exit read_ble with result (%s)", current_thread())
                 return [int(x, 16) for x in res.group(0).split()]
 
         except subprocess.CalledProcessError as err:
-            LOGGER.debug("Error %s from gatttool (%s)",
-                         err.returncode, err.output)
+            LOGGER.debug("Error %s from gatttool (%s) in thread %s",
+                         err.returncode, err.output, current_thread())
         except subprocess.TimeoutExpired:
-            LOGGER.info("Timeout while waiting for gatttool output")
+            LOGGER.info("Timeout while waiting for gatttool in thread %s",
+                        current_thread())
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
@@ -68,6 +74,7 @@ def read_ble(mac, handle, retries=3, timeout=20):
             time.sleep(delay)
             delay *= 2
 
+    LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
     return None
 
 
@@ -107,7 +114,7 @@ class MiFloraPoller(object):
         if self._cache is not None:
             self._last_read = datetime.now()
         else:
-            # If a sensor doesn't work, wait at least 5 minutes before retrying
+            # If a sensor doesn't work, wait 5 minutes and retry
             self._last_read = datetime.now() - self._cache_timeout + \
                 timedelta(seconds=300)
             # Automatically retry after 5 minutes
@@ -132,7 +139,9 @@ class MiFloraPoller(object):
                     (datetime.now() - self._cache_timeout > self._last_read):
                 self.fill_cache()
             else:
-                LOGGER.debug("Using cache")
+                LOGGER.debug("Using cache (%s < %s)",
+                             datetime.now() - self._last_read,
+                             self._cache_timeout)
 
         if self._cache and (len(self._cache) == 16):
             return self._parse_data()[parameter]
@@ -141,10 +150,10 @@ class MiFloraPoller(object):
                           self._mac)
 
     def _check_data(self):
-        sum = 0
+        datasum = 0
         for i in self._cache:
-            sum += i
-        if sum == 0:
+            datasum += i
+        if datasum == 0:
             self._cache = None
 
     def _parse_data(self):
