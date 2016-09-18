@@ -7,13 +7,13 @@ No other operating systems are supported at the moment
 """
 
 from datetime import datetime, timedelta
-from threading import Lock, Timer, current_thread
-from random import randint
+from threading import Lock, current_thread
 import re
-import subprocess
+from subprocess import PIPE, Popen, TimeoutExpired
 import logging
 import time
-
+import signal
+import os
 
 #from gattlib import GATTRequester
 
@@ -42,31 +42,36 @@ def read_ble(mac, handle, retries=3, timeout=20):
     LOGGER.debug("Enter read_ble (%s)", current_thread())
 
     while attempt <= retries:
-        try:
-            cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
-            with LOCK:
-                LOGGER.debug("Created lock in thread %s",
-                             current_thread())
-                result = subprocess.check_output(cmd,
-                                                 shell=True,
-                                                 timeout=timeout)
-            LOGGER.debug("Released lock in thread %s", current_thread())
+        cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
+        with LOCK:
+            LOGGER.debug("Created lock in thread %s",
+                         current_thread())
+            LOGGER.debug("Running gatttool with a timeout of %s",
+                         timeout)
 
-            result = result.decode("utf-8").strip(' \n\t')
-            LOGGER.debug("Got %s from gatttool", result)
-            # Parse the output
-            res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
-            if res:
-                LOGGER.debug(
-                    "Exit read_ble with result (%s)", current_thread())
-                return [int(x, 16) for x in res.group(0).split()]
+            with Popen(cmd,
+                       shell=True,
+                       stdout=PIPE,
+                       preexec_fn=os.setsid) as process:
+                try:
+                    result = process.communicate(timeout=timeout)[0]
+                    LOGGER.debug("Finished gatttool")
+                except TimeoutExpired:
+                    # send signal to the process group
+                    os.killpg(process.pid, signal.SIGINT)
+                    result = process.communicate()[0]
+                    LOGGER.debug("Killed hanging gatttool")
 
-        except subprocess.CalledProcessError as err:
-            LOGGER.debug("Error %s from gatttool (%s) in thread %s",
-                         err.returncode, err.output, current_thread())
-        except subprocess.TimeoutExpired:
-            LOGGER.info("Timeout while waiting for gatttool in thread %s",
-                        current_thread())
+        LOGGER.debug("Released lock in thread %s", current_thread())
+
+        result = result.decode("utf-8").strip(' \n\t')
+        LOGGER.debug("Got %s from gatttool", result)
+        # Parse the output
+        res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
+        if res:
+            LOGGER.debug(
+                "Exit read_ble with result (%s)", current_thread())
+            return [int(x, 16) for x in res.group(0).split()]
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
@@ -114,11 +119,9 @@ class MiFloraPoller(object):
         if self._cache is not None:
             self._last_read = datetime.now()
         else:
-            # If a sensor doesn't work, wait 5 minutes and retry
+            # If a sensor doesn't work, wait 5 minutes before retrying
             self._last_read = datetime.now() - self._cache_timeout + \
                 timedelta(seconds=300)
-            # Automatically retry after 5 minutes
-            Timer(300, self.fill_cache).start()
 
     def parameter_value(self, parameter, read_cached=True):
         """
@@ -150,6 +153,8 @@ class MiFloraPoller(object):
                           self._mac)
 
     def _check_data(self):
+        if self._cache is None:
+            return
         datasum = 0
         for i in self._cache:
             datasum += i
