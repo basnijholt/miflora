@@ -1,5 +1,5 @@
 from miflora.miflora_poller import MiFloraPoller, \
-    MI_FERTILITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE
+    MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE
 
 poller = MiFloraPoller("C4:7C:8D:60:8F:E6")
 print("Getting data from Mi Flora")
