@@ -24,6 +24,44 @@ LOGGER = logging.getLogger(__name__)
 
 LOCK = Lock()
 
+def write_ble(mac, handle, value, retries=3, timeout=20):
+    """
+    Read from a BLE address
+
+    @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
+    @param: handle - BLE characteristics handle in format 0xXX
+    @param: value - value to write to the handle
+    @param: timeout - timeout in seconds
+    """
+
+    global LOCK
+    attempt = 0
+    delay = 10
+    while attempt <= retries:
+        try:
+            cmd = "gatttool --device={} --char-write-req -a {} -n {}".format(mac, handle, value)
+            with LOCK:
+                result = subprocess.check_output(cmd,
+                                                 shell=True,
+                                                 timeout=timeout)
+            result = result.decode("utf-8").strip(' \n\t')
+            LOGGER.debug("Got %s from gatttool", result)
+
+        except subprocess.CalledProcessError as err:
+            LOGGER.debug("Error %s from gatttool (%s)",
+                         err.returncode, err.output)
+        except subprocess.TimeoutExpired:
+            LOGGER.info("Timeout while waiting for gatttool output")
+
+        attempt += 1
+        LOGGER.debug("Waiting for %s seconds before retrying", delay)
+        if attempt < retries:
+            time.sleep(delay)
+            delay *= 2
+
+    return None
+
+
 
 def read_ble(mac, handle, retries=3, timeout=20):
     """
@@ -94,6 +132,7 @@ class MiFloraPoller(object):
         return ''.join(chr(n) for n in name)
 
     def fill_cache(self):
+        write_ble(self._mac,"0x33", "A01F")
         self._cache = read_ble(self._mac,
                                "0x35",
                                retries=self.retries,
@@ -104,6 +143,15 @@ class MiFloraPoller(object):
             # If a sensor doesn't work, wait at least 5 minutes before retrying
             self._last_read = datetime.now() - self._cache_timeout + \
                 timedelta(seconds=300)
+
+    def battery_level(self):
+        """
+        Return the battery level.
+
+        This method will always read the data with BLE and won't use caching
+        """
+        battery = read_ble(self._mac, '0x038', retries=self.retries)[0]
+        return battery
 
     def parameter_value(self, parameter, read_cached=True):
         """
