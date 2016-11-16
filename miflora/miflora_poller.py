@@ -26,34 +26,55 @@ LOGGER = logging.getLogger(__name__)
 
 LOCK = Lock()
 
+
 def write_ble(mac, handle, value, retries=3, timeout=20):
     """
     Read from a BLE address
 
     @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
     @param: handle - BLE characteristics handle in format 0xXX
-    @param: value - value to write to the handle
+    @param: value - value to write to the given handle
     @param: timeout - timeout in seconds
     """
 
     global LOCK
     attempt = 0
     delay = 10
-    while attempt <= retries:
-        try:
-            cmd = "gatttool --device={} --char-write-req -a {} -n {}".format(mac, handle, value)
-            with LOCK:
-                result = subprocess.check_output(cmd,
-                                                 shell=True,
-                                                 timeout=timeout)
-            result = result.decode("utf-8").strip(' \n\t')
-            LOGGER.debug("Got %s from gatttool", result)
+    LOGGER.debug("Enter read_ble (%s)", current_thread())
 
-        except subprocess.CalledProcessError as err:
-            LOGGER.debug("Error %s from gatttool (%s)",
-                         err.returncode, err.output)
-        except subprocess.TimeoutExpired:
-            LOGGER.info("Timeout while waiting for gatttool output")
+    while attempt <= retries:
+        cmd = "gatttool --device={} --char-write-req -a {} -n {}".format(mac,
+                                                                         handle,
+                                                                         value)
+        with LOCK:
+            LOGGER.debug("Created lock in thread %s",
+                         current_thread())
+            LOGGER.debug("Running gatttool with a timeout of %s",
+                         timeout)
+
+            with Popen(cmd,
+                       shell=True,
+                       stdout=PIPE,
+                       preexec_fn=os.setsid) as process:
+                try:
+                    result = process.communicate(timeout=timeout)[0]
+                    LOGGER.debug("Finished gatttool")
+                except TimeoutExpired:
+                    # send signal to the process group
+                    os.killpg(process.pid, signal.SIGINT)
+                    result = process.communicate()[0]
+                    LOGGER.debug("Killed hanging gatttool")
+
+        LOGGER.debug("Released lock in thread %s", current_thread())
+
+        result = result.decode("utf-8").strip(' \n\t')
+        LOGGER.debug("Got %s from gatttool", result)
+        # Parse the output
+        res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
+        if res:
+            LOGGER.debug(
+                "Exit read_ble with result (%s)", current_thread())
+            return [int(x, 16) for x in res.group(0).split()]
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
@@ -61,8 +82,8 @@ def write_ble(mac, handle, value, retries=3, timeout=20):
             time.sleep(delay)
             delay *= 2
 
+    LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
     return None
-
 
 
 def read_ble(mac, handle, retries=3, timeout=20):
@@ -151,7 +172,7 @@ class MiFloraPoller(object):
 
     def fill_cache(self):
         if self.firmware_version() >= "2.6.6":
-            write_ble(self._mac,"0x33", "A01F")
+            write_ble(self._mac, "0x33", "A01F")
         self._cache = read_ble(self._mac,
                                "0x35",
                                retries=self.retries,
