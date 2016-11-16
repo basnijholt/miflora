@@ -121,6 +121,7 @@ class MiFloraPoller(object):
         self.retries = retries
         self.ble_timeout = 10
         self.lock = Lock()
+        self._firmware_version = None
 
     def name(self):
         """
@@ -132,7 +133,8 @@ class MiFloraPoller(object):
         return ''.join(chr(n) for n in name)
 
     def fill_cache(self):
-        write_ble(self._mac,"0x33", "A01F")
+        if self.firmware_version() >= "2.6.6":
+            write_ble(self._mac,"0x33", "A01F")
         self._cache = read_ble(self._mac,
                                "0x35",
                                retries=self.retries,
@@ -152,6 +154,13 @@ class MiFloraPoller(object):
         """
         battery = read_ble(self._mac, '0x038', retries=self.retries)[0]
         return battery
+
+    def firmware_version(self):
+        """ Return the firmware version. """
+        if self._firmware_version is None:
+            res = read_ble(self._mac, '0x038', retries=self.retries)
+            self._firmware_version = "".join(map(chr, res[2:]))
+        return self._firmware_version
 
     def parameter_value(self, parameter, read_cached=True):
         """
