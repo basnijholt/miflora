@@ -21,6 +21,7 @@ MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
 MI_MOISTURE = "moisture"
 MI_CONDUCTIVITY = "conductivity"
+MI_BATTERY = "battery"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -156,6 +157,7 @@ class MiFloraPoller(object):
         self._cache = None
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
+        self._fw_last_read = datetime.now()
         self.retries = retries
         self.ble_timeout = 10
         self.lock = Lock()
@@ -189,15 +191,19 @@ class MiFloraPoller(object):
         """
         Return the battery level.
 
-        This method will always read the data with BLE and won't use caching
+        The battery level is updated when reading the firmware version. This
+        is done only once every 24h
         """
-        battery = read_ble(self._mac, '0x038', retries=self.retries)[0]
-        return battery
+        self.firmware_version()
+        return self.battery
 
     def firmware_version(self):
         """ Return the firmware version. """
-        if self._firmware_version is None:
+        if (self._firmware_version is None) or \
+                (datetime.now() - timedelta(hours=24) > self._fw_last_read):
+            self._fw_last_read = datetime.now()
             res = read_ble(self._mac, '0x038', retries=self.retries)
+            self.battery = res[0]
             self._firmware_version = "".join(map(chr, res[2:]))
         return self._firmware_version
 
@@ -211,7 +217,9 @@ class MiFloraPoller(object):
         This behaviour can be overwritten by the "read_cached" parameter.
         """
 
-        # Check if the cache shouldn't be used
+        # Special handling for battery attribute
+        if parameter == MI_BATTERY:
+            return self.battery_level()
 
         # Use the lock to make sure the cache isn't updated multiple times
         with self.lock:
