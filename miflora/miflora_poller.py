@@ -203,8 +203,12 @@ class MiFloraPoller(object):
                 (datetime.now() - timedelta(hours=24) > self._fw_last_read):
             self._fw_last_read = datetime.now()
             res = read_ble(self._mac, '0x038', retries=self.retries)
-            self.battery = res[0]
-            self._firmware_version = "".join(map(chr, res[2:]))
+            if res is None:
+                self.battery = 0
+                self._firmware_version = None
+            else:
+                self.battery = res[0]
+                self._firmware_version = "".join(map(chr, res[2:]))
         return self._firmware_version
 
     def parameter_value(self, parameter, read_cached=True):
