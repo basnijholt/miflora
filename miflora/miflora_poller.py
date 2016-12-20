@@ -173,7 +173,14 @@ class MiFloraPoller(object):
         return ''.join(chr(n) for n in name)
 
     def fill_cache(self):
-        if self.firmware_version() >= "2.6.6":
+        firmware_version = self.firmware_version()
+        if not firmware_version:
+            # If a sensor doesn't work, wait 5 minutes before retrying
+            self._last_read = datetime.now() - self._cache_timeout + \
+                timedelta(seconds=300)
+            return
+
+        if firmware_version >= "2.6.6":
             write_ble(self._mac, "0x33", "A01F")
         self._cache = read_ble(self._mac,
                                "0x35",
