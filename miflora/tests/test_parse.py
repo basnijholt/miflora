@@ -5,7 +5,7 @@ Created on Jul 8, 2016
 '''
 import unittest
 from miflora.miflora_poller import MiFloraPoller, \
-    MI_FERTILITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE
+    MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE
 from datetime import datetime
 
 
@@ -18,7 +18,7 @@ class KNXConversionTest(unittest.TestCase):
                 0x0e, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
         poller._cache = data
         self._last_read = datetime.now()
-        self.assertEquals(poller._parse_data()[MI_FERTILITY], 270)
+        self.assertEquals(poller._parse_data()[MI_CONDUCTIVITY], 270)
         self.assertEquals(poller._parse_data()[MI_MOISTURE], 40)
         self.assertEquals(poller._parse_data()[MI_LIGHT], 9975)
         self.assertEquals(poller._parse_data()[MI_TEMPERATURE], 29.3)
@@ -27,7 +27,7 @@ class KNXConversionTest(unittest.TestCase):
                 0x65, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x000]
         poller._cache = data
         self._last_read = datetime.now()
-        self.assertEquals(poller._parse_data()[MI_FERTILITY], 101)
+        self.assertEquals(poller._parse_data()[MI_CONDUCTIVITY], 101)
         self.assertEquals(poller._parse_data()[MI_MOISTURE], 16)
         self.assertEquals(poller._parse_data()[MI_LIGHT], 121)
         self.assertEquals(poller._parse_data()[MI_TEMPERATURE], 24.2)
