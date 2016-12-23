@@ -4,11 +4,22 @@ from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
 
 # Settings for the domoticz server
+
+# Forum see: http://domoticz.com/forum/viewtopic.php?f=56&t=13306&hilit=mi+flora&start=20#p105255
+
 domoticzserver   = "127.0.0.1:8080"
 domoticzusername = ""
 domoticzpassword = ""
 
 # Sensor IDs
+
+# Create 4 virtual sensors in dummy hardware
+# type temperature
+# type lux
+# type moisture
+# type custom
+
+$ fill in here there id's'
 idx_temp  = "138"
 idx_lux   = "140"
 idx_moist = "139"
@@ -25,14 +36,6 @@ def domoticzrequest (url):
   return response.read()
 
 poller = MiFloraPoller("C4:7C:8D:62:42:88")
-#print("Getting data from Mi Flora")
-#print("FW: {}".format(poller.firmware_version()))
-#print("Name: {}".format(poller.name()))
-#print("Temperature: {}".format(poller.parameter_value("temperature")))
-#print("Moisture: {}".format(poller.parameter_value(MI_MOISTURE)))
-#print("Light: {}".format(poller.parameter_value(MI_LIGHT)))
-#print("Conductivity: {}".format(poller.parameter_value(MI_CONDUCTIVITY)))
-#print("Battery: {}".format(poller.parameter_value(MI_BATTERY)))
 
 val_bat  = "{}".format(poller.parameter_value(MI_BATTERY))
 
