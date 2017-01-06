@@ -20,7 +20,7 @@ domoticzpassword = ""
 # type temperature
 # type lux
 # type moisture
-# type custom
+# type custom (for conductivity)
 
 base64string = base64.encodestring(('%s:%s' % (domoticzusername, domoticzpassword)).encode()).decode().replace('\n', '')
 
@@ -30,12 +30,13 @@ def domoticzrequest (url):
   response = urllib.request.urlopen(request)
   return response.read()
 
-def go(address,idx_moist,idx_temp,idx_lux,idx_cond):
+def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
 
     poller = MiFloraPoller(address)
     
     global domoticzserver
 
+    # Uncomment for debugging...
     #print("Getting data from Mi Flora: " + address)
     #print("FW: {}".format(poller.firmware_version()))
     #print("Name: {}".format(poller.name()))
@@ -62,20 +63,17 @@ def go(address,idx_moist,idx_temp,idx_lux,idx_cond):
     # Update conductivity
     val_cond = "{}".format(poller.parameter_value(MI_CONDUCTIVITY))
     domoticzrequest("http://" + domoticzserver + "/json.htm?type=command&param=udevice&idx=" + idx_cond + "&svalue=" + val_cond + "&battery=" + val_bat)
+    
+    # Make sure you sleep to let the bluetooth do it's thing before next sensor read
+    time.sleep(1)
 
-
-# format address moist temp lux cond
-go("C4:7C:8D:62:42:88","139","138","140","141")
-time.sleep(1)
-go("C4:7C:8D:62:48:71","329","338","339","348")
-time.sleep(1)
-go("C4:7C:8D:62:47:D0","330","337","340","347")
-time.sleep(1)
-go("C4:7C:8D:62:48:4A","331","336","341","346")
-time.sleep(1)
-go("C4:7C:8D:62:47:CB","332","335","342","345")
-time.sleep(1)
-go("C4:7C:8D:62:47:B7","333","334","343","344")
+# format: update(sensoraddress,moistidx,temperatureidx,luxidx,customidx)
+update("C4:7C:8D:62:42:88","139","138","140","141")
+update("C4:7C:8D:62:48:71","329","338","339","348")
+update("C4:7C:8D:62:47:D0","330","337","340","347")
+update("C4:7C:8D:62:48:4A","331","336","341","346")
+update("C4:7C:8D:62:47:CB","332","335","342","345")
+update("C4:7C:8D:62:47:B7","333","334","343","344")
 
 
 
