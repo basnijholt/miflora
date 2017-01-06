@@ -36,14 +36,14 @@ def go(address,idx_moist,idx_temp,idx_lux,idx_cond):
     
     global domoticzserver
 
-    print("Getting data from Mi Flora: " + address)
-    print("FW: {}".format(poller.firmware_version()))
-    print("Name: {}".format(poller.name()))
-    print("Moisture: {}".format(poller.parameter_value(MI_MOISTURE)))
-    print("Light: {}".format(poller.parameter_value(MI_LIGHT)))
-    print("Conductivity: {}".format(poller.parameter_value(MI_CONDUCTIVITY)))
-    print("Battery: {}".format(poller.parameter_value(MI_BATTERY)))
-    print("Temperature: {}".format(poller.parameter_value("temperature")))
+    #print("Getting data from Mi Flora: " + address)
+    #print("FW: {}".format(poller.firmware_version()))
+    #print("Name: {}".format(poller.name()))
+    #print("Moisture: {}".format(poller.parameter_value(MI_MOISTURE)))
+    #print("Light: {}".format(poller.parameter_value(MI_LIGHT)))
+    #print("Conductivity: {}".format(poller.parameter_value(MI_CONDUCTIVITY)))
+    #print("Battery: {}".format(poller.parameter_value(MI_BATTERY)))
+    #print("Temperature: {}".format(poller.parameter_value("temperature")))
 
     val_bat  = "{}".format(poller.parameter_value(MI_BATTERY))
 
