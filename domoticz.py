@@ -66,27 +66,37 @@ def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
 
 # format address, moist (%), temp (°C), lux, fertility
 
-# 1: Vrouwentong (sansevieria trifasciata)
+print("1: Vrouwentong (sansevieria trifasciata)")
 update("C4:7C:8D:62:42:88","139","138","140","470")
-# 2: Gatenplant: (monstera deliciosa)
+
+print("2: Gatenplant: (monstera deliciosa)")
 update("C4:7C:8D:62:48:71","329","338","339","471")
-# 3: Banana
+
+print("3: Bananen boom (musa)")
 update("C4:7C:8D:62:47:D0","330","337","340","472")
-# 4: De Graslelie (chlorophytum comosum)
+
+print("4: Graslelie (chlorophytum comosum)")
 update("C4:7C:8D:62:48:4A","331","336","341","473")
-# 5: Wonderstruik (codiaeum variegatum)
+
+print("5: Wonderstruik (codiaeum variegatum)")
 update("C4:7C:8D:62:47:CB","332","335","342","474")
-# 6:
+
+print("6: Manderijn (citrus reticulata)")
 update("C4:7C:8D:62:47:B7","333","334","343","475")
-# 7:
+
+print("7: Ficus (ficus elastica)")
 update("C4:7C:8D:62:2F:F5","440","445","450","476")
-# 8:
+
+print("8: Dracaena (dracaena marginata)")
 update("C4:7C:8D:62:3B:2A","441","446","451","477")
-# 9:
+
+print("9: Grapefruit (citrus paradisi)")
 update("C4:7C:8D:62:2C:40","442","447","452","478")
-# 10:
+
+print("10: Yucca (yucca  elephantipes")
 update("C4:7C:8D:62:3B:31","443","448","453","479")
-# 11:
+
+print("11: Lepelplant (spathiphyllum)")
 update("C4:7C:8D:62:3B:B7","444","449","454","480")
 
 
