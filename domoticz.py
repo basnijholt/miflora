@@ -57,12 +57,11 @@ def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
 
     # Update moisture
     val_moist = "{}".format(poller.parameter_value(MI_MOISTURE))
-    domoticzrequest("http://" + domoticzserver + "/json.htm?type=command&param=udevice&idx=" + idx_moist + "&nvalue=" + val_moist + "&battery=" + val_bat)
+    domoticzrequest("http://" + domoticzserver + "/json.htm?type=command&param=udevice&idx=" + idx_moist + "&svalue=" + val_moist + "&battery=" + val_bat)
 
     # Update fertility
     val_cond = "{}".format(poller.parameter_value(MI_CONDUCTIVITY))
-    print ("http://" + domoticzserver + "/json.htm?type=command&param=udevice&idx=" + idx_cond + "&nvalue=&svalue=" + val_cond + "&battery=" + val_bat)
-    domoticzrequest("http://" + domoticzserver + "/json.htm?type=command&param=udevice&idx=" + idx_cond + "&nvalue=&svalue=" + val_cond + "&battery=" + val_bat)
+    domoticzrequest("http://" + domoticzserver + "/json.htm?type=command&param=udevice&idx=" + idx_cond + "&svalue=" + val_cond + "&battery=" + val_bat)
     time.sleep(1)
 
 # format address, moist (%), temp (°C), lux, fertility
