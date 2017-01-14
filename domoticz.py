@@ -12,7 +12,7 @@ domoticzserver   = "127.0.0.1:8080"
 domoticzusername = ""
 domoticzpassword = ""
 
-# sudo hcitool lescan
+# So id devices use: sudo hcitool lescan
 
 # Sensor IDs
 
