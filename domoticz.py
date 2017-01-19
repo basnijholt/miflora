@@ -43,7 +43,7 @@ def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
     
     loop = 0
     while loop < 3 and poller.parameter_value("temperature") > 200:
-        time.sleep(1000);
+        time.sleep(1000)
         poller = MiFloraPoller(address)
         loop += 1
     
