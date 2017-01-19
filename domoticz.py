@@ -42,10 +42,15 @@ def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
     # 61149 lux
     
     loop = 0
-    while loop < 3 and poller.parameter_value("temperature") > 200:
-        time.sleep(1000)
+    while loop < 2 and poller.parameter_value("temperature") > 200:
+        print("Patched: Error reading value retry...\n")
+        time.sleep(5000)
         poller = MiFloraPoller(address)
         loop += 1
+    
+    if poller.parameter_value("temperature") > 200:
+        print("Patched: Error reading value\n")
+        return
     
     global domoticzserver
 
