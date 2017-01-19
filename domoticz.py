@@ -33,6 +33,19 @@ def domoticzrequest (url):
 def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
 
     poller = MiFloraPoller(address)
+
+    # reading error in poller (happens sometime, you go and bug the original author):
+    #
+    # 26231 fertility
+    # 136% moisture
+    # 4804.2 temperature
+    # 61149 lux
+    
+    loop = 0
+    while loop < 3 and poller.parameter_value("temperature") > 200:
+        time.sleep(1000);
+        poller = MiFloraPoller(address)
+        loop += 1
     
     global domoticzserver
 
@@ -42,11 +55,14 @@ def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
     print("Temperature: {}°C".format(poller.parameter_value("temperature")))
     print("Moisture: {}%".format(poller.parameter_value(MI_MOISTURE)))
     print("Light: {} lux".format(poller.parameter_value(MI_LIGHT)))
-    print("Fertility: {} uS/cm".format(poller.parameter_value(MI_CONDUCTIVITY)))
+    print("Fertility: {} uS/cm?".format(poller.parameter_value(MI_CONDUCTIVITY)))
     print("Battery: {}%".format(poller.parameter_value(MI_BATTERY)))
 
     val_bat  = "{}".format(poller.parameter_value(MI_BATTERY))
 
+    if poller.parameter_value("temperature") > 100:
+    poller = MiFloraPoller(address)
+    
     # Update temp
     val_temp = "{}".format(poller.parameter_value("temperature"))
     domoticzrequest("http://" + domoticzserver + "/json.htm?type=command&param=udevice&idx=" + idx_temp + "&nvalue=0&svalue=" + val_temp + "&battery=" + val_bat)
