@@ -59,9 +59,6 @@ def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
     print("Battery: {}%".format(poller.parameter_value(MI_BATTERY)))
 
     val_bat  = "{}".format(poller.parameter_value(MI_BATTERY))
-
-    if poller.parameter_value("temperature") > 100:
-    poller = MiFloraPoller(address)
     
     # Update temp
     val_temp = "{}".format(poller.parameter_value("temperature"))
