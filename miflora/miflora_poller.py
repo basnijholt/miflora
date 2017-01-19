@@ -30,7 +30,7 @@ LOCK = Lock()
 
 def write_ble(mac, handle, value, retries=3, timeout=20):
     """
-    Read from a BLE address
+    Write to a BLE address
 
     @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
     @param: handle - BLE characteristics handle in format 0xXX
@@ -41,7 +41,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20):
     global LOCK
     attempt = 0
     delay = 10
-    LOGGER.debug("Enter read_ble (%s)", current_thread())
+    LOGGER.debug("Enter write_ble (%s)", current_thread())
 
     while attempt <= retries:
         cmd = "gatttool --device={} --char-write-req -a {} -n {}".format(mac,
@@ -71,11 +71,11 @@ def write_ble(mac, handle, value, retries=3, timeout=20):
         result = result.decode("utf-8").strip(' \n\t')
         LOGGER.debug("Got %s from gatttool", result)
         # Parse the output
-        res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
+        res = re.search("successfully", result)
         if res:
             LOGGER.debug(
-                "Exit read_ble with result (%s)", current_thread())
-            return [int(x, 16) for x in res.group(0).split()]
+                "Exit write_ble with result (%s)", current_thread())
+            return None
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
