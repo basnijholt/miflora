@@ -44,7 +44,7 @@ def update(address,idx_moist,idx_temp,idx_lux,idx_cond):
     loop = 0
     while loop < 2 and poller.parameter_value("temperature") > 200:
         print("Patched: Error reading value retry after 5 seconds...\n")
-        time.sleep(5000)
+        time.sleep(5)
         poller = MiFloraPoller(address)
         loop += 1
     
