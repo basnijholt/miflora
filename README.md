@@ -9,6 +9,11 @@ It supports reading
 - moisture
 - fertility
 - light intensity
+- battery
+
+Domoticz bridge original author: https://www.domoticz.com/forum/viewtopic.php?f=56&t=13306&sid=e0934220d4b0b7518dc5b6733c0621bb&start=20#p105255
+Xiaomi original author: See fork parent :-)
+
 
 ### Other nice stuff!!!
 
