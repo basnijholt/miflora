@@ -28,7 +28,7 @@ LOGGER = logging.getLogger(__name__)
 LOCK = Lock()
 
 
-def write_ble(mac, handle, value, retries=3, timeout=20):
+def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
     """
     Read from a BLE address
 
@@ -44,9 +44,10 @@ def write_ble(mac, handle, value, retries=3, timeout=20):
     LOGGER.debug("Enter read_ble (%s)", current_thread())
 
     while attempt <= retries:
-        cmd = "gatttool --device={} --char-write-req -a {} -n {}".format(mac,
-                                                                         handle,
-                                                                         value)
+        cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(mac,
+                                                                                    handle,
+                                                                                    value,
+                                                                                    adapter)
         with LOCK:
             LOGGER.debug("Created lock in thread %s",
                          current_thread())
@@ -87,7 +88,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20):
     return None
 
 
-def read_ble(mac, handle, retries=3, timeout=20):
+def read_ble(mac, handle, retries=3, timeout=20, adapter='hci0'):
     """
     Read from a BLE address
 
@@ -102,7 +103,9 @@ def read_ble(mac, handle, retries=3, timeout=20):
     LOGGER.debug("Enter read_ble (%s)", current_thread())
 
     while attempt <= retries:
-        cmd = "gatttool --device={} --char-read -a {}".format(mac, handle)
+        cmd = "gatttool --device={} --char-read -a {} --adapter={}".format(mac,
+                                                                         handle,
+                                                                         adapter)
         with LOCK:
             LOGGER.debug("Created lock in thread %s",
                          current_thread())
@@ -148,12 +151,13 @@ class MiFloraPoller(object):
     A class to read data from Mi Flora plant sensors.
     """
 
-    def __init__(self, mac, cache_timeout=600, retries=3):
+    def __init__(self, mac, cache_timeout=600, retries=3, adapter='hci0'):
         """
         Initialize a Mi Flora Poller for the given MAC address.
         """
 
         self._mac = mac
+        self._adapter = adapter
         self._cache = None
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
@@ -169,7 +173,8 @@ class MiFloraPoller(object):
         """
         name = read_ble(self._mac, "0x03",
                         retries=self.retries,
-                        timeout=self.ble_timeout)
+                        timeout=self.ble_timeout,
+                        adapter=self._adapter)
         return ''.join(chr(n) for n in name)
 
     def fill_cache(self):
@@ -185,7 +190,8 @@ class MiFloraPoller(object):
         self._cache = read_ble(self._mac,
                                "0x35",
                                retries=self.retries,
-                               timeout=self.ble_timeout)
+                               timeout=self.ble_timeout,
+                               adapter=self._adapter)
         self._check_data()
         if self._cache is not None:
             self._last_read = datetime.now()
@@ -209,7 +215,7 @@ class MiFloraPoller(object):
         if (self._firmware_version is None) or \
                 (datetime.now() - timedelta(hours=24) > self._fw_last_read):
             self._fw_last_read = datetime.now()
-            res = read_ble(self._mac, '0x038', retries=self.retries)
+            res = read_ble(self._mac, '0x038', retries=self.retries, adapter=self._adapter)
             if res is None:
                 self.battery = 0
                 self._firmware_version = None
