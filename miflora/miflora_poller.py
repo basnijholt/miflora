@@ -75,7 +75,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
         if "successfully" in result:
             LOGGER.debug(
                 "Exit read_ble with result (%s)", current_thread())
-            return [int(x, 16) for x in res.group(0).split()]
+            return True
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
@@ -84,7 +84,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
             delay *= 2
 
     LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
-    return None
+    return False
 
 
 def read_ble(mac, handle, retries=3, timeout=20, adapter='hci0'):
@@ -185,8 +185,7 @@ class MiFloraPoller(object):
             return
 
         if firmware_version >= "2.6.6":
-            res = write_ble(self._mac, "0x33", "A01F")
-            if res is None:
+            if not write_ble(self._mac, "0x33", "A01F"):
                 # If a sensor doesn't work, wait 5 minutes before retrying
                 self._last_read = datetime.now() - self._cache_timeout + \
                     timedelta(seconds=300)
@@ -265,7 +264,7 @@ class MiFloraPoller(object):
         if self._cache[7] > 100: # moisture over 100 procent
             self._cache = None
             return
-        if firmware_version >= "2.6.6":
+        if self._firmware_version >= "2.6.6":
             if sum(self._cache[10:]) == 0:
                 self._cache = None
                 return
