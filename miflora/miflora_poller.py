@@ -72,11 +72,10 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
         result = result.decode("utf-8").strip(' \n\t')
         LOGGER.debug("Got %s from gatttool", result)
         # Parse the output
-        res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
-        if res:
+        if "successfully" in result:
             LOGGER.debug(
                 "Exit read_ble with result (%s)", current_thread())
-            return [int(x, 16) for x in res.group(0).split()]
+            return True
 
         attempt += 1
         LOGGER.debug("Waiting for %s seconds before retrying", delay)
@@ -85,7 +84,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
             delay *= 2
 
     LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
-    return None
+    return False
 
 
 def read_ble(mac, handle, retries=3, timeout=20, adapter='hci0'):
@@ -186,7 +185,11 @@ class MiFloraPoller(object):
             return
 
         if firmware_version >= "2.6.6":
-            write_ble(self._mac, "0x33", "A01F")
+            if not write_ble(self._mac, "0x33", "A01F"):
+                # If a sensor doesn't work, wait 5 minutes before retrying
+                self._last_read = datetime.now() - self._cache_timeout + \
+                    timedelta(seconds=300)
+                return
         self._cache = read_ble(self._mac,
                                "0x35",
                                retries=self.retries,
@@ -258,11 +261,16 @@ class MiFloraPoller(object):
     def _check_data(self):
         if self._cache is None:
             return
-        datasum = 0
-        for i in self._cache:
-            datasum += i
-        if datasum == 0:
+        if self._cache[7] > 100: # moisture over 100 procent
             self._cache = None
+            return
+        if self._firmware_version >= "2.6.6":
+            if sum(self._cache[10:]) == 0:
+                self._cache = None
+                return
+        if sum(self._cache) == 0:
+            self._cache = None
+            return None
 
     def _parse_data(self):
         data = self._cache
