@@ -52,6 +52,7 @@ class MiFloraPoller(object):
         """
         Return the name of the sensor.
         """
+        self._connect()
         byte_array = self._retry(self.peripheral.readCharacteristic, [0x03])
         return byte_array.decode('ascii')
 
