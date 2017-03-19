@@ -52,8 +52,8 @@ class MiFloraPoller(object):
         """
         Return the name of the sensor.
         """
-        # TODO: implement me
-        return "no name"
+        byte_array = self._retry(self.peripheral.readCharacteristic, [0x03])
+        return byte_array.decode('ascii')
 
     def fill_cache(self):
         firmware_version = self.firmware_version()
