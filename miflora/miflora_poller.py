@@ -7,15 +7,10 @@ No other operating systems are supported at the moment
 """
 
 from datetime import datetime, timedelta
-from threading import Lock, current_thread
-import re
-from subprocess import PIPE, Popen, TimeoutExpired
+from threading import Lock
 import logging
 import time
-import signal
-import os
-
-#from gattlib import GATTRequester
+from bluepy.btle import Peripheral, BTLEException
 
 MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
@@ -23,126 +18,12 @@ MI_MOISTURE = "moisture"
 MI_CONDUCTIVITY = "conductivity"
 MI_BATTERY = "battery"
 
+BYTEORDER = 'little'
+INVALID_DATA = b'\xaa\xbb\xcc\xdd\xee\xff\x99\x88wf\x00\x00\x00\x00\x00\x00'
+
 LOGGER = logging.getLogger(__name__)
 
 LOCK = Lock()
-
-
-def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
-    """
-    Read from a BLE address
-
-    @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
-    @param: handle - BLE characteristics handle in format 0xXX
-    @param: value - value to write to the given handle
-    @param: timeout - timeout in seconds
-    """
-
-    global LOCK
-    attempt = 0
-    delay = 10
-    LOGGER.debug("Enter read_ble (%s)", current_thread())
-
-    while attempt <= retries:
-        cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(mac,
-                                                                                    handle,
-                                                                                    value,
-                                                                                    adapter)
-        with LOCK:
-            LOGGER.debug("Created lock in thread %s",
-                         current_thread())
-            LOGGER.debug("Running gatttool with a timeout of %s",
-                         timeout)
-
-            with Popen(cmd,
-                       shell=True,
-                       stdout=PIPE,
-                       preexec_fn=os.setsid) as process:
-                try:
-                    result = process.communicate(timeout=timeout)[0]
-                    LOGGER.debug("Finished gatttool")
-                except TimeoutExpired:
-                    # send signal to the process group
-                    os.killpg(process.pid, signal.SIGINT)
-                    result = process.communicate()[0]
-                    LOGGER.debug("Killed hanging gatttool")
-
-        LOGGER.debug("Released lock in thread %s", current_thread())
-
-        result = result.decode("utf-8").strip(' \n\t')
-        LOGGER.debug("Got %s from gatttool", result)
-        # Parse the output
-        if "successfully" in result:
-            LOGGER.debug(
-                "Exit read_ble with result (%s)", current_thread())
-            return True
-
-        attempt += 1
-        LOGGER.debug("Waiting for %s seconds before retrying", delay)
-        if attempt < retries:
-            time.sleep(delay)
-            delay *= 2
-
-    LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
-    return False
-
-
-def read_ble(mac, handle, retries=3, timeout=20, adapter='hci0'):
-    """
-    Read from a BLE address
-
-    @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
-    @param: handle - BLE characteristics handle in format 0xXX
-    @param: timeout - timeout in seconds
-    """
-
-    global LOCK
-    attempt = 0
-    delay = 10
-    LOGGER.debug("Enter read_ble (%s)", current_thread())
-
-    while attempt <= retries:
-        cmd = "gatttool --device={} --char-read -a {} --adapter={}".format(mac,
-                                                                         handle,
-                                                                         adapter)
-        with LOCK:
-            LOGGER.debug("Created lock in thread %s",
-                         current_thread())
-            LOGGER.debug("Running gatttool with a timeout of %s",
-                         timeout)
-
-            with Popen(cmd,
-                       shell=True,
-                       stdout=PIPE,
-                       preexec_fn=os.setsid) as process:
-                try:
-                    result = process.communicate(timeout=timeout)[0]
-                    LOGGER.debug("Finished gatttool")
-                except TimeoutExpired:
-                    # send signal to the process group
-                    os.killpg(process.pid, signal.SIGINT)
-                    result = process.communicate()[0]
-                    LOGGER.debug("Killed hanging gatttool")
-
-        LOGGER.debug("Released lock in thread %s", current_thread())
-
-        result = result.decode("utf-8").strip(' \n\t')
-        LOGGER.debug("Got %s from gatttool", result)
-        # Parse the output
-        res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
-        if res:
-            LOGGER.debug(
-                "Exit read_ble with result (%s)", current_thread())
-            return [int(x, 16) for x in res.group(0).split()]
-
-        attempt += 1
-        LOGGER.debug("Waiting for %s seconds before retrying", delay)
-        if attempt < retries:
-            time.sleep(delay)
-            delay *= 2
-
-    LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
-    return None
 
 
 class MiFloraPoller(object):
@@ -154,7 +35,8 @@ class MiFloraPoller(object):
         """
         Initialize a Mi Flora Poller for the given MAC address.
         """
-
+        # TODO: the lifecycle of peripheral is a bit strange and might need improvement
+        self.peripheral = None
         self._mac = mac
         self._adapter = adapter
         self._cache = None
@@ -170,11 +52,8 @@ class MiFloraPoller(object):
         """
         Return the name of the sensor.
         """
-        name = read_ble(self._mac, "0x03",
-                        retries=self.retries,
-                        timeout=self.ble_timeout,
-                        adapter=self._adapter)
-        return ''.join(chr(n) for n in name)
+        # TODO: implement me
+        return "no name"
 
     def fill_cache(self):
         firmware_version = self.firmware_version()
@@ -185,19 +64,14 @@ class MiFloraPoller(object):
             return
 
         if firmware_version >= "2.6.6":
-            if not write_ble(self._mac, "0x33", "A01F"):
-                # If a sensor doesn't work, wait 5 minutes before retrying
-                self._last_read = datetime.now() - self._cache_timeout + \
-                    timedelta(seconds=300)
-                return
-        self._cache = read_ble(self._mac,
-                               "0x35",
-                               retries=self.retries,
-                               timeout=self.ble_timeout,
-                               adapter=self._adapter)
-        self._check_data()
-        if self._cache is not None:
+            self._retry(self.peripheral.writeCharacteristic, [0x33, bytes([0xA0, 0x1F]), True])
+        result = self._retry(self.peripheral.readCharacteristic, [0x35])
+        LOGGER.debug('Raw data for char 0x35: %s', self._format_bytes(result))
+
+        if result != INVALID_DATA:
             self._last_read = datetime.now()
+            self._decode_characteristic_35(result)
+            self._disconnect()
         else:
             # If a sensor doesn't work, wait 5 minutes before retrying
             self._last_read = datetime.now() - self._cache_timeout + \
@@ -213,19 +87,50 @@ class MiFloraPoller(object):
         self.firmware_version()
         return self.battery
 
+    def _connect(self):
+        if self.peripheral is None:
+            self.peripheral = self._retry(Peripheral, [self._mac])
+            LOGGER.debug('connected to device %s', self._mac)
+
+    def _disconnect(self):
+        self.peripheral.disconnect()
+        self.peripheral = None
+
     def firmware_version(self):
         """ Return the firmware version. """
         if (self._firmware_version is None) or \
                 (datetime.now() - timedelta(hours=24) > self._fw_last_read):
             self._fw_last_read = datetime.now()
-            res = read_ble(self._mac, '0x038', retries=self.retries, adapter=self._adapter)
-            if res is None:
-                self.battery = 0
-                self._firmware_version = None
-            else:
-                self.battery = res[0]
-                self._firmware_version = "".join(map(chr, res[2:]))
+            self._connect()
+            result = self._retry(self.peripheral.readCharacteristic, [0x38])
+            self._decode_characteristic_38(result)
         return self._firmware_version
+
+    def _decode_characteristic_38(self, byte_array):
+        """Perform byte magic when decoding the data from the sensor."""
+        self.battery = int.from_bytes(byte_array[0:1], byteorder=BYTEORDER)
+        self._firmware_version = byte_array[2:7].decode('ascii')
+        LOGGER.debug('Raw data for char 0x38: %s', self._format_bytes(byte_array))
+        LOGGER.debug('battery: %d', self.battery)
+        LOGGER.debug('version: %s', self._firmware_version)
+
+    def _decode_characteristic_35(self, result):
+        """Perform byte magic when decoding the data from the sensor."""
+        # negative numbers are stored in one's complement
+        temp_bytes = result[0:2]
+        if temp_bytes[1] & 0x80 > 0:
+            temp_bytes = [temp_bytes[0] ^ 0xFF, temp_bytes[1] ^ 0xFF]
+
+        # the temperature needs to be scaled by factor of 0.1
+        self._temperature = int.from_bytes(temp_bytes, byteorder=BYTEORDER)/10.0
+        self._brightness = int.from_bytes(result[3:5], byteorder=BYTEORDER)
+        self._moisture = int.from_bytes(result[7:8], byteorder=BYTEORDER)
+        self._conductivity = int.from_bytes(result[8:10], byteorder=BYTEORDER)
+
+        LOGGER.debug('temp: %f', self._temperature)
+        LOGGER.debug('brightness: %d', self._brightness)
+        LOGGER.debug('conductivity: %d', self._conductivity)
+        LOGGER.debug('moisture: %d', self._moisture)
 
     def parameter_value(self, parameter, read_cached=True):
         """
@@ -251,32 +156,32 @@ class MiFloraPoller(object):
                 LOGGER.debug("Using cache (%s < %s)",
                              datetime.now() - self._last_read,
                              self._cache_timeout)
+            if parameter == MI_CONDUCTIVITY:
+                return self._conductivity
+            elif parameter == MI_MOISTURE:
+                return self._moisture
+            elif parameter == MI_TEMPERATURE:
+                return self._temperature
+            elif parameter == MI_LIGHT:
+                return self._brightness
+            raise Exception('unknown parameter %s', parameter)
 
-        if self._cache and (len(self._cache) == 16):
-            return self._parse_data()[parameter]
-        else:
-            raise IOError("Could not read data from Mi Flora sensor %s",
-                          self._mac)
+    @staticmethod
+    def _retry(func, args, num_tries=5, sleep_time=0.5):
+        """Retry calling a function on Exception."""
+        for i in range(0, num_tries):
+            try:
+                return func(*args)
+            except BTLEException as exception:
+                LOGGER.info("function %s failed (try %d of %d)", func, i+1, num_tries)
+                time.sleep(sleep_time * (2 ^ i))
+                if i == num_tries - 1:
+                    LOGGER.error('retry finally failed!')
+                    raise exception
+                else:
+                    continue
 
-    def _check_data(self):
-        if self._cache is None:
-            return
-        if self._cache[7] > 100: # moisture over 100 procent
-            self._cache = None
-            return
-        if self._firmware_version >= "2.6.6":
-            if sum(self._cache[10:]) == 0:
-                self._cache = None
-                return
-        if sum(self._cache) == 0:
-            self._cache = None
-            return None
-
-    def _parse_data(self):
-        data = self._cache
-        res = {}
-        res[MI_TEMPERATURE] = float(data[1] * 256 + data[0]) / 10
-        res[MI_MOISTURE] = data[7]
-        res[MI_LIGHT] = data[4] * 256 + data[3]
-        res[MI_CONDUCTIVITY] = data[9] * 256 + data[8]
-        return res
+    @staticmethod
+    def _format_bytes(raw_data):
+        """Prettyprint a byte array."""
+        return ' '.join([format(c, "02x") for c in raw_data])
