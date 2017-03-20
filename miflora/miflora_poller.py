@@ -9,7 +9,7 @@ No other operating systems are supported at the moment
 from datetime import datetime, timedelta
 import logging
 import time
-from bluepy.btle import Peripheral, BTLEException
+from bluepy.btle import Peripheral, BTLEException, ADDR_TYPE_PUBLIC
 
 MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
@@ -32,13 +32,23 @@ class MiFloraPoller(object):
     A class to read data from Mi Flora plant sensors.
     """
 
-    def __init__(self, mac, cache_timeout=600, retries=3, adapter='hci0'):
+    def __init__(self, mac, cache_timeout=600, retries=3, sleep_time=0.5, adapter='0'):
         """
         Initialize a Mi Flora Poller for the given MAC address.
+
+        Arguments:
+            mac (string): MAC address of the sensor to be polled
+            cache_timeout (int): Maximum age of the sensor data before it will be polled again
+            retries (int): number of retries for errors in the Bluetooth communication
+            sleep_time (float): base factor of time between retries. with every retry,
+                the factor is squared (=expotential backoff time)
+            adapter (int): number of the Bluetooth adapter to be used, "0" means "/dev/hci0"
+
         """
         self._mac = mac
         self._adapter = adapter
         self._cache_timeout = timedelta(seconds=cache_timeout)
+        self._sleep_time = sleep_time
         self._last_read = None
         self._retries = retries
         self._firmware_version = None
@@ -97,8 +107,7 @@ class MiFloraPoller(object):
         if self._last_read is None or \
                 (self._last_read + self._cache_timeout) <= datetime.now() or \
                 not read_cached:
-            # TODO: pick the right adapter when creating the Peripheral
-            peripheral = self._retry(Peripheral, [self._mac])
+            peripheral = self._retry(Peripheral, [self._mac, ADDR_TYPE_PUBLIC, self._adapter])
             LOGGER.debug('connected to device %s', self._mac)
 
             self._fetch_name(peripheral)
@@ -153,14 +162,14 @@ class MiFloraPoller(object):
         LOGGER.debug('conductivity: %d', self._conductivity)
         LOGGER.debug('moisture: %d', self._moisture)
 
-    def _retry(self, func, args, sleep_time=0.5):
+    def _retry(self, func, args):
         """Retry calling a function on Exception."""
         for i in range(0, self._retries):
             try:
                 return func(*args)
             except BTLEException as exception:
                 LOGGER.info("function %s failed (try %d of %d)", func, i+1, self._retries)
-                time.sleep(sleep_time * (2 ^ i))
+                time.sleep(self._sleep_time * (2 ^ i))
                 if i == self._retries - 1:
                     LOGGER.error('retry finally failed!')
                     raise exception
