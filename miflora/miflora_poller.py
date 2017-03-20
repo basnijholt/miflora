@@ -21,6 +21,11 @@ MI_BATTERY = "battery"
 BYTEORDER = 'little'
 INVALID_DATA = b'\xaa\xbb\xcc\xdd\xee\xff\x99\x88wf\x00\x00\x00\x00\x00\x00'
 
+"""Configure how long data is cached before new values are
+retrieved from the sensor.
+"""
+UPDATE_INTERVAL = 5*60
+
 LOGGER = logging.getLogger(__name__)
 
 LOCK = Lock()
@@ -35,8 +40,6 @@ class MiFloraPoller(object):
         """
         Initialize a Mi Flora Poller for the given MAC address.
         """
-        # TODO: the lifecycle of peripheral is a bit strange and might need improvement
-        self.peripheral = None
         self._mac = mac
         self._adapter = adapter
         self._cache = None
@@ -47,72 +50,66 @@ class MiFloraPoller(object):
         self.ble_timeout = 10
         self.lock = Lock()
         self._firmware_version = None
+        self._battery = None
+        self._name = None
+        self._temperature = None
+        self._brightness = None
+        self._moisture = None
+        self._conductivity = None
 
-    def name(self):
+    def _fetch_name(self, peripheral):
         """
-        Return the name of the sensor.
+        Fetch the name of the sensor.
         """
-        self._connect()
-        byte_array = self._retry(self.peripheral.readCharacteristic, [0x03])
-        return byte_array.decode('ascii')
+        byte_array = self._retry(peripheral.readCharacteristic, [0x03])
+        self._name = byte_array.decode('ascii')
 
-    def fill_cache(self):
-        firmware_version = self.firmware_version()
-        if not firmware_version:
-            # If a sensor doesn't work, wait 5 minutes before retrying
-            self._last_read = datetime.now() - self._cache_timeout + \
-                timedelta(seconds=300)
-            return
-
-        if firmware_version >= "2.6.6":
-            self._retry(self.peripheral.writeCharacteristic, [0x33, bytes([0xA0, 0x1F]), True])
-        result = self._retry(self.peripheral.readCharacteristic, [0x35])
-        LOGGER.debug('Raw data for char 0x35: %s', self._format_bytes(result))
-
-        if result != INVALID_DATA:
-            self._last_read = datetime.now()
-            self._decode_characteristic_35(result)
-            self._disconnect()
-        else:
-            # If a sensor doesn't work, wait 5 minutes before retrying
-            self._last_read = datetime.now() - self._cache_timeout + \
-                timedelta(seconds=300)
-
-    def battery_level(self):
-        """
-        Return the battery level.
-
-        The battery level is updated when reading the firmware version. This
-        is done only once every 24h
-        """
-        self.firmware_version()
-        return self.battery
-
-    def _connect(self):
-        if self.peripheral is None:
-            self.peripheral = self._retry(Peripheral, [self._mac])
+    def _fill_cache(self,read_cached=True):
+        if self._last_read is None or \
+               (self._last_read + timedelta(seconds=UPDATE_INTERVAL)) <= datetime.now() or \
+                not read_cached:
+            # TODO: pick the right adapter when creating the Peripheral
+            peripheral = self._retry(Peripheral, [self._mac])
             LOGGER.debug('connected to device %s', self._mac)
 
-    def _disconnect(self):
-        self.peripheral.disconnect()
-        self.peripheral = None
+            self._fetch_name(peripheral)
+            self._fetch_version_battery(peripheral)
+            self._fetch_measurements(peripheral)
+            peripheral.disconnect()
+            self._last_read = datetime.now()
+
+    def _fetch_version_battery(self, peripheral):
+        result = self._retry(peripheral.readCharacteristic, [0x38])
+        self._decode_characteristic_38(result)
+
+    def _fetch_measurements(self, peripheral):
+        if self._firmware_version >= "2.6.6":
+            self._retry(peripheral.writeCharacteristic, [0x33, bytes([0xA0, 0x1F]), True])
+        result = self._retry(peripheral.readCharacteristic, [0x35])
+        LOGGER.debug('Raw data for char 0x35: %s', self._format_bytes(result))
+
+        if result == INVALID_DATA:
+            raise Exception('Received invalid data from the sensor')
+        self._decode_characteristic_35(result)
+
+    def battery_level(self):
+        self._fill_cache()
+        return self._battery
 
     def firmware_version(self):
         """ Return the firmware version. """
-        if (self._firmware_version is None) or \
-                (datetime.now() - timedelta(hours=24) > self._fw_last_read):
-            self._fw_last_read = datetime.now()
-            self._connect()
-            result = self._retry(self.peripheral.readCharacteristic, [0x38])
-            self._decode_characteristic_38(result)
+        self._fill_cache()
         return self._firmware_version
+
+    def name(self):
+        return self._name
 
     def _decode_characteristic_38(self, byte_array):
         """Perform byte magic when decoding the data from the sensor."""
-        self.battery = int.from_bytes(byte_array[0:1], byteorder=BYTEORDER)
+        self._battery = int.from_bytes(byte_array[0:1], byteorder=BYTEORDER)
         self._firmware_version = byte_array[2:7].decode('ascii')
         LOGGER.debug('Raw data for char 0x38: %s', self._format_bytes(byte_array))
-        LOGGER.debug('battery: %d', self.battery)
+        LOGGER.debug('battery: %d', self._battery)
         LOGGER.debug('version: %s', self._firmware_version)
 
     def _decode_characteristic_35(self, result):
@@ -143,29 +140,18 @@ class MiFloraPoller(object):
         This behaviour can be overwritten by the "read_cached" parameter.
         """
 
-        # Special handling for battery attribute
+        self._fill_cache(read_cached)
         if parameter == MI_BATTERY:
             return self.battery_level()
-
-        # Use the lock to make sure the cache isn't updated multiple times
-        with self.lock:
-            if (read_cached is False) or \
-                    (self._last_read is None) or \
-                    (datetime.now() - self._cache_timeout > self._last_read):
-                self.fill_cache()
-            else:
-                LOGGER.debug("Using cache (%s < %s)",
-                             datetime.now() - self._last_read,
-                             self._cache_timeout)
-            if parameter == MI_CONDUCTIVITY:
-                return self._conductivity
-            elif parameter == MI_MOISTURE:
-                return self._moisture
-            elif parameter == MI_TEMPERATURE:
-                return self._temperature
-            elif parameter == MI_LIGHT:
-                return self._brightness
-            raise Exception('unknown parameter %s', parameter)
+        elif parameter == MI_CONDUCTIVITY:
+            return self._conductivity
+        elif parameter == MI_MOISTURE:
+            return self._moisture
+        elif parameter == MI_TEMPERATURE:
+            return self._temperature
+        elif parameter == MI_LIGHT:
+            return self._brightness
+        raise Exception('unknown parameter %s', parameter)
 
     @staticmethod
     def _retry(func, args, num_tries=5, sleep_time=0.5):
