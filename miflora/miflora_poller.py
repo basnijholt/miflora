@@ -9,6 +9,7 @@ No other operating systems are supported at the moment
 from datetime import datetime, timedelta
 import logging
 import time
+import threading
 from bluepy.btle import Peripheral, BTLEException, ADDR_TYPE_PUBLIC
 
 MI_TEMPERATURE = "temperature"
@@ -31,6 +32,10 @@ class MiFloraPoller(object):
     """"
     A class to read data from Mi Flora plant sensors.
     """
+
+    # Lock for access to the bluetooth device,
+    # Class member, so there can only be one class instance accessing bluetooth
+    _GLOBAL_LOCK = threading.Lock()
 
     def __init__(self, mac, cache_timeout=600, retries=3, sleep_time=0.5, adapter='0'):
         """
@@ -58,6 +63,7 @@ class MiFloraPoller(object):
         self._brightness = None
         self._moisture = None
         self._conductivity = None
+        self._lock = threading.Lock()
 
     def battery_level(self):
         """Return the battery level."""
@@ -103,18 +109,32 @@ class MiFloraPoller(object):
         - there are no previous measurements or
         - read_cached is False or
         - the measurements are older than 5 minutes
-        """
-        if self._last_read is None or \
-                (self._last_read + self._cache_timeout) <= datetime.now() or \
-                not read_cached:
-            peripheral = self._retry(Peripheral, [self._mac, ADDR_TYPE_PUBLIC, self._adapter])
-            LOGGER.debug('connected to device %s', self._mac)
 
-            self._fetch_name(peripheral)
-            self._fetch_version_battery(peripheral)
-            self._fetch_measurements(peripheral)
-            peripheral.disconnect()
-            self._last_read = datetime.now()
+        This method is tread safe: There can only be one object per
+        Python Runtime that is accessing the bluetooth sensor.
+        """
+
+        # get local lock so that we do not poll data while an update is in progress
+        # this lock is only for the current sensor. So you still can get cached data
+        # while the update of another sensor is in progress.
+        with self._lock:
+
+            if self._last_read is None or \
+                    (self._last_read + self._cache_timeout) <= datetime.now() or \
+                    not read_cached:
+                # get global lock when accessing the Bluetooth hardware
+                # this lock is only aquired if we acutally read data from the hardware
+                # this will make sure that only one process is using the Bluetooth
+                # communication at a time.
+                with MiFloraPoller._GLOBAL_LOCK:
+                    peripheral = self._retry(Peripheral, [self._mac, ADDR_TYPE_PUBLIC, self._adapter])
+                    LOGGER.debug('connected to device %s', self._mac)
+
+                    self._fetch_name(peripheral)
+                    self._fetch_version_battery(peripheral)
+                    self._fetch_measurements(peripheral)
+                    peripheral.disconnect()
+                    self._last_read = datetime.now()
 
     def _fetch_name(self, peripheral):
         """Fetch the name of the sensor."""
