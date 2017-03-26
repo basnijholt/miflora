@@ -41,7 +41,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
     global LOCK
     attempt = 0
     delay = 10
-    LOGGER.debug("Enter read_ble (%s)", current_thread())
+    LOGGER.debug("Enter write_ble (%s)", current_thread())
 
     while attempt <= retries:
         cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(mac,
