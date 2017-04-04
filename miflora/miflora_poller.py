@@ -112,6 +112,11 @@ class MiFloraPoller:
         return self._fetch_measurement()
 
     @property
+    def history(self):
+        """Fetch and return current device history"""
+        return self._fetch_history()
+
+    @property
     def temperature(self):
         """Return temperature measurement"""
         return self._fetch_measurement()[MI_TEMPERATURE]
@@ -161,9 +166,12 @@ class MiFloraPoller:
         if self.firmware_version >= "2.6.6":
             self.write(handle_measurement_control, cmd_measurement_read_init, withResponse=True)
         response = self.read(handle_measurement_read)
+
         if response == INVALID_DATA:
             raise ValueError('Received invalid data from the sensor')
+
         timestamps = self._fetch_device_time()
+        timestamps[MI_WALL_TIME] = datetime.fromtimestamp(timestamps[MI_WALL_TIME])
         return {**timestamps, **self._decode_measurement(response)}
 
     @auto_connect
