@@ -18,4 +18,5 @@ setup(name='miflora',
       ],
       packages=find_packages(),
       keywords='plant sensor bluetooth low-energy ble',
+      install_requires = ['bluepy'],
       zip_safe=False)
