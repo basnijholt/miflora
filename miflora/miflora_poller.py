@@ -41,7 +41,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
     global LOCK
     attempt = 0
     delay = 10
-    LOGGER.debug("Enter read_ble (%s)", current_thread())
+    LOGGER.debug("Enter write_ble (%s)", current_thread())
 
     while attempt <= retries:
         cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(mac,
@@ -74,7 +74,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
         # Parse the output
         if "successfully" in result:
             LOGGER.debug(
-                "Exit read_ble with result (%s)", current_thread())
+                "Exit write_ble with result (%s)", current_thread())
             return True
 
         attempt += 1
@@ -83,7 +83,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
             time.sleep(delay)
             delay *= 2
 
-    LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
+    LOGGER.debug("Exit write_ble, no data (%s)", current_thread())
     return False
 
 
