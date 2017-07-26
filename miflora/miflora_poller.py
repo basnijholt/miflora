@@ -41,23 +41,15 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
     global LOCK
     attempt = 0
     delay = 10
-    LOGGER.debug("Enter write_ble (%s)", current_thread())
+    LOGGER.debug("Enter write_ble ({})".format(current_thread()))
 
     while attempt <= retries:
-        cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(mac,
-                                                                                    handle,
-                                                                                    value,
-                                                                                    adapter)
+        cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(mac, handle, value, adapter)
         with LOCK:
-            LOGGER.debug("Created lock in thread %s",
-                         current_thread())
-            LOGGER.debug("Running gatttool with a timeout of %s",
-                         timeout)
+            LOGGER.debug("Created lock in thread {}".format(current_thread()))
+            LOGGER.debug("Running gatttool with a timeout of {}".format(timeout))
 
-            with Popen(cmd,
-                       shell=True,
-                       stdout=PIPE,
-                       preexec_fn=os.setsid) as process:
+            with Popen(cmd, shell=True, stdout=PIPE, preexec_fn=os.setsid) as process:
                 try:
                     result = process.communicate(timeout=timeout)[0]
                     LOGGER.debug("Finished gatttool")
@@ -67,23 +59,23 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
                     result = process.communicate()[0]
                     LOGGER.debug("Killed hanging gatttool")
 
-        LOGGER.debug("Released lock in thread %s", current_thread())
+        LOGGER.debug("Released lock in thread {}".format(current_thread()))
 
         result = result.decode("utf-8").strip(' \n\t')
-        LOGGER.debug("Got %s from gatttool", result)
+        LOGGER.debug("Got {} from gatttool".format(result))
         # Parse the output
         if "successfully" in result:
             LOGGER.debug(
-                "Exit write_ble with result (%s)", current_thread())
+                "Exit write_ble with result ({})".format(current_thread()))
             return True
 
         attempt += 1
-        LOGGER.debug("Waiting for %s seconds before retrying", delay)
+        LOGGER.debug("Waiting for {} seconds before retrying".format(delay))
         if attempt < retries:
             time.sleep(delay)
             delay *= 2
 
-    LOGGER.debug("Exit write_ble, no data (%s)", current_thread())
+    LOGGER.debug("Exit write_ble, no data ({})".format(current_thread()))
     return False
 
 
@@ -99,22 +91,15 @@ def read_ble(mac, handle, retries=3, timeout=20, adapter='hci0'):
     global LOCK
     attempt = 0
     delay = 10
-    LOGGER.debug("Enter read_ble (%s)", current_thread())
+    LOGGER.debug("Enter read_ble ({})".format(current_thread()))
 
     while attempt <= retries:
-        cmd = "gatttool --device={} --char-read -a {} --adapter={}".format(mac,
-                                                                         handle,
-                                                                         adapter)
+        cmd = "gatttool --device={} --char-read -a {} --adapter={}".format(mac, handle, adapter)
         with LOCK:
-            LOGGER.debug("Created lock in thread %s",
-                         current_thread())
-            LOGGER.debug("Running gatttool with a timeout of %s",
-                         timeout)
+            LOGGER.debug("Created lock in thread {}".format(current_thread()))
+            LOGGER.debug("Running gatttool with a timeout of {}".format(timeout))
 
-            with Popen(cmd,
-                       shell=True,
-                       stdout=PIPE,
-                       preexec_fn=os.setsid) as process:
+            with Popen(cmd, shell=True, stdout=PIPE, preexec_fn=os.setsid) as process:
                 try:
                     result = process.communicate(timeout=timeout)[0]
                     LOGGER.debug("Finished gatttool")
@@ -124,24 +109,23 @@ def read_ble(mac, handle, retries=3, timeout=20, adapter='hci0'):
                     result = process.communicate()[0]
                     LOGGER.debug("Killed hanging gatttool")
 
-        LOGGER.debug("Released lock in thread %s", current_thread())
+        LOGGER.debug("Released lock in thread {}".format(current_thread()))
 
         result = result.decode("utf-8").strip(' \n\t')
-        LOGGER.debug("Got %s from gatttool", result)
+        LOGGER.debug("Got {} from gatttool", result)
         # Parse the output
         res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
         if res:
-            LOGGER.debug(
-                "Exit read_ble with result (%s)", current_thread())
+            LOGGER.debug("Exit read_ble with result ({})".format(current_thread()))
             return [int(x, 16) for x in res.group(0).split()]
 
         attempt += 1
-        LOGGER.debug("Waiting for %s seconds before retrying", delay)
+        LOGGER.debug("Waiting for {} seconds before retrying".format(delay))
         if attempt < retries:
             time.sleep(delay)
             delay *= 2
 
-    LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
+    LOGGER.debug("Exit read_ble, no data ({})".format(current_thread()))
     return None
 
 
@@ -174,21 +158,22 @@ class MiFloraPoller(object):
                         retries=self.retries,
                         timeout=self.ble_timeout,
                         adapter=self._adapter)
+        if not name:
+            raise IOError("Could not read data from Mi Flora sensor {}".format(self._mac))
+
         return ''.join(chr(n) for n in name)
 
     def fill_cache(self):
         firmware_version = self.firmware_version()
         if not firmware_version:
             # If a sensor doesn't work, wait 5 minutes before retrying
-            self._last_read = datetime.now() - self._cache_timeout + \
-                timedelta(seconds=300)
+            self._last_read = datetime.now() - self._cache_timeout + timedelta(seconds=300)
             return
 
         if firmware_version >= "2.6.6":
             if not write_ble(self._mac, "0x33", "A01F"):
                 # If a sensor doesn't work, wait 5 minutes before retrying
-                self._last_read = datetime.now() - self._cache_timeout + \
-                    timedelta(seconds=300)
+                self._last_read = datetime.now() - self._cache_timeout + timedelta(seconds=300)
                 return
         self._cache = read_ble(self._mac,
                                "0x35",
@@ -200,8 +185,7 @@ class MiFloraPoller(object):
             self._last_read = datetime.now()
         else:
             # If a sensor doesn't work, wait 5 minutes before retrying
-            self._last_read = datetime.now() - self._cache_timeout + \
-                timedelta(seconds=300)
+            self._last_read = datetime.now() - self._cache_timeout + timedelta(seconds=300)
 
     def battery_level(self):
         """
@@ -215,8 +199,7 @@ class MiFloraPoller(object):
 
     def firmware_version(self):
         """ Return the firmware version. """
-        if (self._firmware_version is None) or \
-                (datetime.now() - timedelta(hours=24) > self._fw_last_read):
+        if (self._firmware_version is None) or (datetime.now() - timedelta(hours=24) > self._fw_last_read):
             self._fw_last_read = datetime.now()
             res = read_ble(self._mac, '0x038', retries=self.retries, adapter=self._adapter)
             if res is None:
@@ -248,15 +231,12 @@ class MiFloraPoller(object):
                     (datetime.now() - self._cache_timeout > self._last_read):
                 self.fill_cache()
             else:
-                LOGGER.debug("Using cache (%s < %s)",
-                             datetime.now() - self._last_read,
-                             self._cache_timeout)
+                LOGGER.debug("Using cache ({} < {})".format(datetime.now() - self._last_read, self._cache_timeout))
 
         if self._cache and (len(self._cache) == 16):
             return self._parse_data()[parameter]
         else:
-            raise IOError("Could not read data from Mi Flora sensor %s",
-                          self._mac)
+            raise IOError("Could not read data from Mi Flora sensor {}".format(self._mac))
 
     def _check_data(self):
         if self._cache is None:
