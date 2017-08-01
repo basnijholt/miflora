@@ -57,6 +57,7 @@ def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
             with Popen(cmd,
                        shell=True,
                        stdout=PIPE,
+                       stderr=PIPE,
                        preexec_fn=os.setsid) as process:
                 try:
                     result = process.communicate(timeout=timeout)[0]
@@ -114,6 +115,7 @@ def read_ble(mac, handle, retries=3, timeout=20, adapter='hci0'):
             with Popen(cmd,
                        shell=True,
                        stdout=PIPE,
+                       stderr=PIPE,
                        preexec_fn=os.setsid) as process:
                 try:
                     result = process.communicate(timeout=timeout)[0]
