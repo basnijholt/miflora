@@ -9,7 +9,7 @@ No other operating systems are supported at the moment
 from datetime import datetime, timedelta
 from threading import Lock, current_thread
 import re
-from subprocess import PIPE, Popen, TimeoutExpired
+from subprocess import PIPE, Popen, TimeoutExpired, call
 import logging
 import time
 import signal
@@ -26,6 +26,10 @@ MI_BATTERY = "battery"
 LOGGER = logging.getLogger(__name__)
 
 LOCK = Lock()
+
+
+def check_prerequisites():
+    return not call("command -v gatttool", shell=True, stdout=PIPE, stderr=PIPE)
 
 
 def write_ble(mac, handle, value, retries=3, timeout=20, adapter='hci0'):
@@ -167,7 +171,11 @@ class MiFloraPoller(object):
         self.ble_timeout = 10
         self.lock = Lock()
         self._firmware_version = None
+        if not check_prerequisites():
+            raise FileNotFoundError("The program gatttool is not available" +
+                "on the host system. Please install it.")
 
+        
     def name(self):
         """
         Return the name of the sensor.
@@ -180,6 +188,10 @@ class MiFloraPoller(object):
             raise IOError("Could not read data from Mi Flora sensor %s", self._mac)
         return ''.join(chr(n) for n in name)
 
+    def clear_cache(self):
+        self._cache = None
+        self._last_read = None
+        
     def fill_cache(self):
         firmware_version = self.firmware_version()
         if not firmware_version:
@@ -206,7 +218,10 @@ class MiFloraPoller(object):
             # If a sensor doesn't work, wait 5 minutes before retrying
             self._last_read = datetime.now() - self._cache_timeout + \
                 timedelta(seconds=300)
-
+    
+    def cache_available(self):
+        return self._cache not None
+    
     def battery_level(self):
         """
         Return the battery level.
