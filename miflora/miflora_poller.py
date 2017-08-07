@@ -187,11 +187,11 @@ class MiFloraPoller(object):
         if not name:
             raise IOError("Could not read data from Mi Flora sensor %s", self._mac)
         return ''.join(chr(n) for n in name)
-
+    
     def clear_cache(self):
         self._cache = None
         self._last_read = None
-        
+    
     def fill_cache(self):
         firmware_version = self.firmware_version()
         if not firmware_version:
@@ -220,7 +220,7 @@ class MiFloraPoller(object):
                 timedelta(seconds=300)
     
     def cache_available(self):
-        return self._cache not None
+        return self._cache is not None
     
     def battery_level(self):
         """
