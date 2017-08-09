@@ -177,7 +177,7 @@ class MiFloraPoller(object):
                         timeout=self.ble_timeout,
                         adapter=self._adapter)
         if not name:
-            raise IOError("Could not read data from Mi Flora sensor %s", self._mac)
+            raise IOError("Could not read data from Mi Flora sensor %s" % (self._mac))
         return ''.join(chr(n) for n in name)
 
     def fill_cache(self):
@@ -259,8 +259,7 @@ class MiFloraPoller(object):
         if self._cache and (len(self._cache) == 16):
             return self._parse_data()[parameter]
         else:
-            raise IOError("Could not read data from Mi Flora sensor %s",
-                          self._mac)
+            raise IOError("Could not read data from Mi Flora sensor %s" % (self._mac))
 
     def _check_data(self):
         if self._cache is None:
