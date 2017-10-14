@@ -63,3 +63,6 @@ target/
 .DS_Store
 .project
 .pydevproject
+
+#PyCharm project files
+.idea/
