@@ -31,8 +31,3 @@ class KNXConversionTest(unittest.TestCase):
         self.assertEquals(poller._parse_data()[MI_MOISTURE], 16)
         self.assertEquals(poller._parse_data()[MI_LIGHT], 121)
         self.assertEquals(poller._parse_data()[MI_TEMPERATURE], 24.2)
-
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
