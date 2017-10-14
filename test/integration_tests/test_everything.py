@@ -5,6 +5,11 @@ from miflora.miflora_poller import (MiFloraPoller, MI_CONDUCTIVITY,
 
 
 class TestEverything(unittest.TestCase):
+    """End to End test case.
+
+    This check if we can successfully get some data from a real sensor. This test requires bluetooth hardware and a
+    real sensor close by.
+    """
 
     @pytest.mark.usefixtures("mac")
     def test_everything(self):
