@@ -53,8 +53,8 @@ class GatttoolBackend(AbstractBackend):
         _LOGGER.debug("Enter write_ble (%s)", current_thread())
 
         while attempt <= self.retries:
-            cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}"\
-                .format(self._mac, handle, value, self.adapter)
+            cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(
+                self._mac, self.byte_to_handle(handle), self.bytes_to_string(value), self.adapter)
             _LOGGER.debug("Running gatttool with a timeout of %d: %s",
                           self.timeout, cmd)
 
@@ -106,8 +106,8 @@ class GatttoolBackend(AbstractBackend):
         _LOGGER.debug("Enter read_ble (%s)", current_thread())
 
         while attempt <= self.retries:
-            cmd = "gatttool --device={} --char-read -a {} --adapter={}"\
-                .format(self._mac, handle, self.adapter)
+            cmd = "gatttool --device={} --char-read -a {} --adapter={}".format(
+                self._mac, self.byte_to_handle(handle), self.adapter)
             _LOGGER.debug("Running gatttool with a timeout of %d: %s",
                           self.timeout, cmd)
             with Popen(cmd,
@@ -150,3 +150,15 @@ class GatttoolBackend(AbstractBackend):
             msg = 'gatttool not found: {}'.format(str(e))
             _LOGGER.error(msg)
             raise BluetoothBackendException(msg)
+
+    @staticmethod
+    def byte_to_handle(b):
+        return '0x'+'{:02x}'.format(b).upper()
+
+    @staticmethod
+    def bytes_to_string(raw_data, prefix=False):
+        prefix_string = ''
+        if prefix:
+            prefix_string = '0x'
+        suffix = ''.join([format(c, "02x") for c in raw_data])
+        return prefix_string + suffix.upper()

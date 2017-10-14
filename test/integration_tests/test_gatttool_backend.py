@@ -1,17 +1,18 @@
 import unittest
 import pytest
 
+from miflora.backends import BluetoothBackendException
 from miflora.backends.gatttool import GatttoolBackend
 
-TEST_READ_HANDLE = '0x038'
-TEST_WRITE_HANDLE = "0x33"
-TEST_WRITE_DATA = "A01F"
+TEST_READ_HANDLE = 0x38
+TEST_WRITE_HANDLE = 0x33
+TEST_WRITE_DATA = bytes([0xA0, 0x1F])
 
 
 class TestGatttoolBackend(unittest.TestCase):
 
     def setUp(self):
-        self.backend = GatttoolBackend(retries=0, timeout=5)
+        self.backend = GatttoolBackend(retries=0, timeout=20)
 
     @pytest.mark.usefixtures("mac")
     def test_read(self):
@@ -32,6 +33,8 @@ class TestGatttoolBackend(unittest.TestCase):
             self.backend.read_handle(TEST_READ_HANDLE)
             self.fail('should have thrown an exception')
         except ValueError:
+            pass
+        except BluetoothBackendException:
             pass
 
     def test_check_backend(self):
