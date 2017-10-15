@@ -5,6 +5,7 @@ Read data from Mi Flora plant sensor.
 from datetime import datetime, timedelta
 import logging
 from threading import Lock
+from miflora.backends import BluetoothInterface
 
 MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
@@ -21,13 +22,13 @@ class MiFloraPoller(object):
     A class to read data from Mi Flora plant sensors.
     """
 
-    def __init__(self, mac, Backend, cache_timeout=600, retries=3, adapter='hci0'):
+    def __init__(self, mac, backend, cache_timeout=600, retries=3, adapter='hci0'):
         """
         Initialize a Mi Flora Poller for the given MAC address.
         """
 
         self._mac = mac
-        self.backend = Backend(adapter)
+        self._bt_interface = BluetoothInterface(backend, adapter)
         self._cache = None
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
@@ -36,14 +37,14 @@ class MiFloraPoller(object):
         self.ble_timeout = 10
         self.lock = Lock()
         self._firmware_version = None
+        self.battery = None
 
     def name(self):
         """
         Return the name of the sensor.
         """
-        self.backend.connect(self._mac)
-        name = self.backend.read_handle("0x03")
-        self.backend.disconnect()
+        with self._bt_interface.connect(self._mac) as connection:
+            name = connection.read_handle("0x03")
 
         if not name:
             raise IOError("Could not read data from Mi Flora sensor %s" % (self._mac))
@@ -51,28 +52,27 @@ class MiFloraPoller(object):
 
     def fill_cache(self):
         firmware_version = self.firmware_version()
-        self.backend.connect(self._mac)
-        if not firmware_version:
-            # If a sensor doesn't work, wait 5 minutes before retrying
-            self._last_read = datetime.now() - self._cache_timeout + \
-                timedelta(seconds=300)
-            return
-
-        if firmware_version >= "2.6.6":
-            if not self.backend.write_handle("0x33", "A01F"):
+        with self._bt_interface.connect(self._mac) as connection:
+            if not firmware_version:
                 # If a sensor doesn't work, wait 5 minutes before retrying
                 self._last_read = datetime.now() - self._cache_timeout + \
                     timedelta(seconds=300)
                 return
-        self._cache = self.backend.read_handle("0x35")
-        self._check_data()
-        if self._cache is not None:
-            self._last_read = datetime.now()
-        else:
-            # If a sensor doesn't work, wait 5 minutes before retrying
-            self._last_read = datetime.now() - self._cache_timeout + \
-                timedelta(seconds=300)
-        self.backend.disconnect()
+
+            if firmware_version >= "2.6.6":
+                if not connection.write_handle("0x33", "A01F"):
+                    # If a sensor doesn't work, wait 5 minutes before retrying
+                    self._last_read = datetime.now() - self._cache_timeout + \
+                        timedelta(seconds=300)
+                    return
+            self._cache = connection.read_handle("0x35")
+            self._check_data()
+            if self._cache is not None:
+                self._last_read = datetime.now()
+            else:
+                # If a sensor doesn't work, wait 5 minutes before retrying
+                self._last_read = datetime.now() - self._cache_timeout + \
+                    timedelta(seconds=300)
 
     def battery_level(self):
         """
@@ -89,9 +89,8 @@ class MiFloraPoller(object):
         if (self._firmware_version is None) or \
                 (datetime.now() - timedelta(hours=24) > self._fw_last_read):
             self._fw_last_read = datetime.now()
-            self.backend.connect(self._mac)
-            res = self.backend.read_handle('0x038')
-            self.backend.disconnect()
+            with self._bt_interface.connect(self._mac) as connection:
+                res = connection.read_handle('0x038')
             if res is None:
                 self.battery = 0
                 self._firmware_version = None
