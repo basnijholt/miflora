@@ -1,12 +1,9 @@
 import unittest
 import pytest
 
+from miflora.miflora_poller import HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE
 from miflora.backends import BluetoothBackendException
 from miflora.backends.gatttool import GatttoolBackend
-
-TEST_READ_HANDLE = 0x38
-TEST_WRITE_HANDLE = 0x33
-TEST_WRITE_DATA = bytes([0xA0, 0x1F])
 
 
 class TestGatttoolBackend(unittest.TestCase):
@@ -17,20 +14,20 @@ class TestGatttoolBackend(unittest.TestCase):
     @pytest.mark.usefixtures("mac")
     def test_read(self):
         self.backend.connect(self.mac)
-        result = self.backend.read_handle(TEST_READ_HANDLE)
+        result = self.backend.read_handle(HANDLE_READ_NAME)
         self.assertIsNotNone(result)
         self.backend.disconnect()
 
     @pytest.mark.usefixtures("mac")
     def test_write(self):
         self.backend.connect(self.mac)
-        result = self.backend.write_handle(TEST_WRITE_HANDLE, TEST_WRITE_DATA)
+        result = self.backend.write_handle(HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE)
         self.assertIsNotNone(result)
         self.backend.disconnect()
 
     def test_read_not_connected(self):
         try:
-            self.backend.read_handle(TEST_READ_HANDLE)
+            self.backend.read_handle(HANDLE_READ_NAME)
             self.fail('should have thrown an exception')
         except ValueError:
             pass
