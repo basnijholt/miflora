@@ -2,6 +2,7 @@
 import pytest
 import logging
 
+
 def pytest_addoption(parser):
     """Setup test environment for pytest.
 

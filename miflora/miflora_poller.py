@@ -16,7 +16,6 @@ MI_BATTERY = "battery"
 LOGGER = logging.getLogger(__name__)
 
 
-
 class MiFloraPoller(object):
     """"
     A class to read data from Mi Flora plant sensors.
@@ -132,7 +131,7 @@ class MiFloraPoller(object):
     def _check_data(self):
         if self._cache is None:
             return
-        if self._cache[7] > 100: # moisture over 100 procent
+        if self._cache[7] > 100:  # moisture over 100 procent
             self._cache = None
             return
         if self._firmware_version >= "2.6.6":

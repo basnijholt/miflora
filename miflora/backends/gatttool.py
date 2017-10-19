@@ -53,10 +53,8 @@ class GatttoolBackend(AbstractBackend):
         _LOGGER.debug("Enter write_ble (%s)", current_thread())
 
         while attempt <= self.retries:
-            cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(self._mac,
-                                                                                        handle,
-                                                                                        value,
-                                                                                        self.adapter)
+            cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}"\
+                .format(self._mac, handle, value, self.adapter)
             _LOGGER.debug("Running gatttool with a timeout of %d: %s",
                           self.timeout, cmd)
 
@@ -108,9 +106,8 @@ class GatttoolBackend(AbstractBackend):
         _LOGGER.debug("Enter read_ble (%s)", current_thread())
 
         while attempt <= self.retries:
-            cmd = "gatttool --device={} --char-read -a {} --adapter={}".format(self._mac,
-                                                                             handle,
-                                                                             self.adapter)
+            cmd = "gatttool --device={} --char-read -a {} --adapter={}"\
+                .format(self._mac, handle, self.adapter)
             _LOGGER.debug("Running gatttool with a timeout of %d: %s",
                           self.timeout, cmd)
             with Popen(cmd,
