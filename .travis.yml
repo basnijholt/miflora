@@ -11,6 +11,8 @@ matrix:
       env: TOXENV=py35
     - python: "3.6"
       env: TOXENV=py36
+    - python: "3.6"
+      env: TOXENV=lint
 
 script: travis_wait tox
 after_success: coveralls
