@@ -11,7 +11,7 @@ class TestBluetoothInterface(unittest.TestCase):
         bt = BluetoothInterface(MockBackend)
         self.assertFalse(bt.is_connected())
 
-        with bt.connect('abc') as connection:
+        with bt.connect('abc'):  # as connection:
             self.assertTrue(bt.is_connected())
 
         self.assertFalse(bt.is_connected())
