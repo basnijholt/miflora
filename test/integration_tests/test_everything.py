@@ -3,10 +3,14 @@ import pytest
 from miflora.miflora_poller import (MiFloraPoller, MI_CONDUCTIVITY,
                                     MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY)
 from miflora.backends.gatttool import GatttoolBackend
+from miflora.backends.bluepy import BluepyBackend
 
 
-class TestEverything(unittest.TestCase):
+class TestEverythingGatt(unittest.TestCase):
     """End to End test cases for MiFlora."""
+
+    def setUp(self):
+        self.backend_type = GatttoolBackend
 
     @pytest.mark.usefixtures("mac")
     def test_everything(self):
@@ -16,7 +20,7 @@ class TestEverything(unittest.TestCase):
         real sensor close by.
         """
         assert hasattr(self, "mac")
-        poller = MiFloraPoller(self.mac, GatttoolBackend)
+        poller = MiFloraPoller(self.mac, self.backend_type)
         self.assertIsNotNone(poller.firmware_version())
         self.assertIsNotNone(poller.name())
         self.assertIsNotNone(poller.parameter_value(MI_TEMPERATURE))
@@ -24,3 +28,10 @@ class TestEverything(unittest.TestCase):
         self.assertIsNotNone(poller.parameter_value(MI_LIGHT))
         self.assertIsNotNone(poller.parameter_value(MI_CONDUCTIVITY))
         self.assertIsNotNone(poller.parameter_value(MI_BATTERY))
+
+
+class TestEverythingBluepy(TestEverythingGatt):
+    """Run the same tests as in the gatttool test"""
+
+    def setUp(self):
+        self.backend_type = BluepyBackend

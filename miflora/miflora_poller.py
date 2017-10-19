@@ -7,6 +7,12 @@ import logging
 from threading import Lock
 from miflora.backends import BluetoothInterface
 
+HANDLE_READ_VERSION_BATTERY = 0x38
+HANDLE_READ_NAME = 0x03
+HANDLE_READ_SENSOR_DATA = 0x35
+HANDLE_WRITE_MODE_CHANGE = 0x33
+DATA_MODE_CHANGE = bytes([0xA0, 0x1F])
+
 MI_TEMPERATURE = "temperature"
 MI_LIGHT = "light"
 MI_MOISTURE = "moisture"
@@ -43,7 +49,7 @@ class MiFloraPoller(object):
         Return the name of the sensor.
         """
         with self._bt_interface.connect(self._mac) as connection:
-            name = connection.read_handle("0x03")
+            name = connection.read_handle(HANDLE_READ_NAME)
 
         if not name:
             raise IOError("Could not read data from Mi Flora sensor %s" % (self._mac))
@@ -59,12 +65,12 @@ class MiFloraPoller(object):
                 return
 
             if firmware_version >= "2.6.6":
-                if not connection.write_handle("0x33", "A01F"):
+                if not connection.write_handle(HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE):
                     # If a sensor doesn't work, wait 5 minutes before retrying
                     self._last_read = datetime.now() - self._cache_timeout + \
                         timedelta(seconds=300)
                     return
-            self._cache = connection.read_handle("0x35")
+            self._cache = connection.read_handle(HANDLE_READ_SENSOR_DATA)
             self._check_data()
             if self._cache is not None:
                 self._last_read = datetime.now()
@@ -89,7 +95,7 @@ class MiFloraPoller(object):
                 (datetime.now() - timedelta(hours=24) > self._fw_last_read):
             self._fw_last_read = datetime.now()
             with self._bt_interface.connect(self._mac) as connection:
-                res = connection.read_handle('0x038')
+                res = connection.read_handle(HANDLE_READ_VERSION_BATTERY)
             if res is None:
                 self.battery = 0
                 self._firmware_version = None
