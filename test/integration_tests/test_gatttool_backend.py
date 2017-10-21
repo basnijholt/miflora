@@ -1,7 +1,7 @@
 import unittest
 import pytest
 
-from miflora.miflora_poller import HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE
+from test import HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE
 from miflora.backends import BluetoothBackendException
 from miflora.backends.gatttool import GatttoolBackend
 
