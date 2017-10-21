@@ -18,4 +18,6 @@ setup(name='miflora',
       ],
       packages=find_packages(),
       keywords='plant sensor bluetooth low-energy ble',
-      zip_safe=False)
+      zip_safe=False,
+      extras_require={'testing': ['pyest']}
+      )
