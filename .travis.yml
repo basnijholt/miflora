@@ -12,7 +12,7 @@ matrix:
     - python: "3.6"
       env: TOXENV=py36
     - python: "3.6"
-      env: TOXENV=lint
+      env: TOXENV=flake8
 
 script: travis_wait tox
 after_success: coveralls
