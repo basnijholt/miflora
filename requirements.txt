@@ -1,2 +1,2 @@
-bluepy==1.1.0
+bluepy==1.1.2
 pytest
