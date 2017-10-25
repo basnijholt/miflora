@@ -2,7 +2,7 @@ import unittest
 
 from miflora.backends import BluetoothInterface
 
-from test.unit_tests import MockBackend
+from test.helper import MockBackend
 
 
 class TestBluetoothInterface(unittest.TestCase):
