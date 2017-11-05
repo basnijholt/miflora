@@ -91,10 +91,9 @@ class TestGatttool(unittest.TestCase):
         be.connect(TEST_MAC)
         self.assertFalse(be.write_handle(0xFF, b'\X00\X10\XFF'))
 
-    @mock.patch('miflora.backends.gatttool.Popen')
-    def test_check_backend_ok(self, popen_mock):
+    @mock.patch('miflora.backends.gatttool.call', return_value=None)
+    def test_check_backend_ok(self, call_mock):
         """Test check_backend successfully."""
-        _configure_popenmock(popen_mock, "")
         be = GatttoolBackend()
         be.check_backend()
 
