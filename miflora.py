@@ -32,7 +32,7 @@ else:
 
 poller = MiFloraPoller(args.mac, backend)
 
-if args.devinfo != None:
+if args.devinfo == True:
     print('{{"name":"{0}","fw":"{1}","battery":{2}}}'
         .format(poller.name(),
             poller.firmware_version(),
