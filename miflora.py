@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import time
 
 from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
@@ -17,7 +18,8 @@ def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('mac', type=valid_miflora_mac)
-parser.add_argument('--backend', choices=['gatttool', 'bluepy'], default='gatttool')
+parser.add_argument('-b', '--backend', choices=['gatttool', 'bluepy'], default='gatttool')
+parser.add_argument('-d', '--devinfo', action='store_true')
 args = parser.parse_args()
 
 backend = None
@@ -30,11 +32,15 @@ else:
 
 poller = MiFloraPoller(args.mac, backend)
 
-print('{{ "fw": "{0}", "name": "{1}", "temperature": {2}, "moisture": {3}, "light": {4}, "conductivity": {5}, "battery": {6} }}'
-    .format(poller.firmware_version(),
-            poller.name(),
+if args.devinfo != None:
+    print('{{"name":"{0}","fw":"{1}","battery":{2}}}'
+        .format(poller.name(),
+            poller.firmware_version(),
+            poller.parameter_value(MI_BATTERY)))
+else:
+    print('{{"timestamp":{0},"temperature":{1},"moisture":{2},"light":{3},"conductivity":{4}}}'
+        .format(int(time.time()),
             poller.parameter_value(MI_TEMPERATURE),
             poller.parameter_value(MI_MOISTURE),
             poller.parameter_value(MI_LIGHT),
-            poller.parameter_value(MI_CONDUCTIVITY),
-            poller.parameter_value(MI_BATTERY)))
+            poller.parameter_value(MI_CONDUCTIVITY)))
