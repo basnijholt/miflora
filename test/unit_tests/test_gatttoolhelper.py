@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 from miflora.backends.gatttool import GatttoolBackend
+from miflora.backends import BluetoothBackendException
 from test import TEST_MAC
 
 
@@ -54,10 +55,10 @@ class TestGatttoolHelper(unittest.TestCase):
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
     def test_write_handle_ok(self, time_mock, popen_mock):
-        _configure_popenmock(popen_mock, '')
+        _configure_popenmock(popen_mock, 'Characteristic value was written successfully')
         be = GatttoolBackend()
         be.connect(TEST_MAC)
-        be.write_handle(0xFF, b'\X00\X10\XFF')
+        self.assertTrue(be.write_handle(0xFF, b'\X00\X10\XFF'))
 
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
@@ -67,6 +68,26 @@ class TestGatttoolHelper(unittest.TestCase):
         be.connect(TEST_MAC)
         with self.assertRaises(ValueError):
             be.write_handle(0xFF, b'\X00\X10\XFF')
+
+    @mock.patch('miflora.backends.gatttool.Popen')
+    @mock.patch('time.sleep', return_value=None)
+    def test_write_handle_no_answer(self, time_mock, popen_mock):
+        _configure_popenmock(popen_mock, '')
+        be = GatttoolBackend()
+        be.connect(TEST_MAC)
+        self.assertFalse(be.write_handle(0xFF, b'\X00\X10\XFF'))
+
+    @mock.patch('miflora.backends.gatttool.Popen')
+    def test_check_backend_ok(self, popen_mock):
+        _configure_popenmock(popen_mock, "")
+        be = GatttoolBackend()
+        be.check_backend()
+
+    @mock.patch('miflora.backends.gatttool.call', **{'side_effect': IOError()})
+    def test_check_backend_ok(self, call_mock):
+        be = GatttoolBackend()
+        with self.assertRaises(BluetoothBackendException):
+            be.check_backend()
 
 
 def _configure_popenmock(popen_mock, output_string):
