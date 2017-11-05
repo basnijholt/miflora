@@ -125,8 +125,11 @@ class GatttoolBackend(AbstractBackend):
                     _LOGGER.debug("Killed hanging gatttool")
 
             result = result.decode("utf-8").strip(' \n\t')
-            _LOGGER.debug("Got %s from gatttool", result)
+            _LOGGER.debug("Got \"%s\" from gatttool", result)
             # Parse the output
+            if "read failed" in result:
+                raise ValueError("Read error from gatttool: %s", result)
+
             res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
             if res:
                 _LOGGER.debug(
