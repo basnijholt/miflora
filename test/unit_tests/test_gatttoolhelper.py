@@ -34,12 +34,39 @@ class TestGatttoolHelper(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch('miflora.backends.gatttool.Popen')
-    def test_read_handle_empty_output(self, popen_mock):
+    def test_read_handle_wrong_handle(self, popen_mock):
         _configure_popenmock(popen_mock, 'Characteristic value/descriptor read failed: Invalid handle')
         be = GatttoolBackend()
         be.connect(TEST_MAC)
         with self.assertRaises(ValueError):
             be.read_handle(0xFF)
+
+    def test_read_not_connected(self):
+        be = GatttoolBackend()
+        with self.assertRaises(ValueError):
+            be.read_handle(0xFF)
+
+    def test_write_not_connected(self):
+        be = GatttoolBackend()
+        with self.assertRaises(ValueError):
+            be.write_handle(0xFF, [0x00])
+
+    @mock.patch('miflora.backends.gatttool.Popen')
+    @mock.patch('time.sleep', return_value=None)
+    def test_write_handle_ok(self, time_mock, popen_mock):
+        _configure_popenmock(popen_mock, '')
+        be = GatttoolBackend()
+        be.connect(TEST_MAC)
+        be.write_handle(0xFF, b'\X00\X10\XFF')
+
+    @mock.patch('miflora.backends.gatttool.Popen')
+    @mock.patch('time.sleep', return_value=None)
+    def test_write_handle_wrong_handle(self, time_mock, popen_mock):
+        _configure_popenmock(popen_mock, "Characteristic Write Request failed: Attribute can't be written")
+        be = GatttoolBackend()
+        be.connect(TEST_MAC)
+        with self.assertRaises(ValueError):
+            be.write_handle(0xFF, b'\X00\X10\XFF')
 
 
 def _configure_popenmock(popen_mock, output_string):

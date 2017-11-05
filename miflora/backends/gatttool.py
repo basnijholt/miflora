@@ -73,6 +73,8 @@ class GatttoolBackend(AbstractBackend):
                     _LOGGER.debug("Killed hanging gatttool")
 
             result = result.decode("utf-8").strip(' \n\t')
+            if "Write Request failed" in result:
+                raise ValueError('Error writing handls to sensor: %s', result)
             _LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
             if "successfully" in result:
