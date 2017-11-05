@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import logging
 
 from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
@@ -18,6 +19,7 @@ def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-
 parser = argparse.ArgumentParser()
 parser.add_argument('mac', type=valid_miflora_mac)
 parser.add_argument('--backend', choices=['gatttool', 'bluepy'], default='gatttool')
+parser.add_argument('-v', '--verbose', action='store_const', const=True)
 args = parser.parse_args()
 
 backend = None
@@ -27,6 +29,9 @@ elif args.backend == 'bluepy':
     backend = BluepyBackend
 else:
     raise Exception('unknown backend: {}'.format(args.backend))
+
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
 
 poller = MiFloraPoller(args.mac, backend)
 
