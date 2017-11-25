@@ -17,7 +17,7 @@ class KNXConversionTest(unittest.TestCase):
         """Does the Mi Flora data parser works correctly?"""
         poller = MiFloraPoller(None, MockBackend)
         data = bytes([0x25, 0x01, 0x00, 0xf7, 0x26, 0x00, 0x00, 0x28,
-                0x0e, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+                      0x0e, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
         poller._cache = data
         self._last_read = datetime.now()
         self.assertEquals(poller._parse_data()[MI_CONDUCTIVITY], 270)
@@ -26,7 +26,7 @@ class KNXConversionTest(unittest.TestCase):
         self.assertEquals(poller._parse_data()[MI_TEMPERATURE], 29.3)
 
         data = bytes([0xf2, 0x00, 0x00, 0x79, 0x00, 0x00, 0x00, 0x10,
-                0x65, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x000])
+                      0x65, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x000])
         poller._cache = data
         self._last_read = datetime.now()
         self.assertEquals(poller._parse_data()[MI_CONDUCTIVITY], 101)
