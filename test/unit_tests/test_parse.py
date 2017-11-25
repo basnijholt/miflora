@@ -1,12 +1,13 @@
-'''
+"""
 Created on Jul 8, 2016
 
 @author: matuschd
-'''
+"""
+
 import unittest
 from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE
-from test.unit_tests import MockBackend
+from test.helper import MockBackend
 from datetime import datetime
 
 
