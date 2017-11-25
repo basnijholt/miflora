@@ -56,6 +56,5 @@ class BluepyBackend(AbstractBackend):
         scanner = Scanner()
         result = []
         for device in scanner.scan(timeout):
-            print(device.addr, device.getValueText(9))
             result.append((device.addr, device.getValueText(9)))
         return result
