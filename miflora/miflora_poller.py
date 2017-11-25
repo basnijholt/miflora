@@ -3,6 +3,7 @@ Read data from Mi Flora plant sensor.
 """
 
 from datetime import datetime, timedelta
+from struct import unpack
 import logging
 from threading import Lock
 from miflora.backends import BluetoothInterface
@@ -157,7 +158,7 @@ class MiFloraPoller(object):
         """
         data = self._cache
         res = dict()
-        res[MI_TEMPERATURE] = float(data[1] * 256 + data[0]) / 10
+        res[MI_TEMPERATURE] = unpack('<h', data[0:2])[0] / 10.0
         res[MI_MOISTURE] = data[7]
         res[MI_LIGHT] = data[4] * 256 + data[3]
         res[MI_CONDUCTIVITY] = data[9] * 256 + data[8]
