@@ -15,7 +15,9 @@ class BluepyBackend(AbstractBackend):
         """Connect to a device."""
         from bluepy.btle import Peripheral
         m = re.search(r'hci([\d]+)', self.adapter)
-        iface = m.group(1)
+        if m is None:
+            raise ValueError('Invalid pattern for BLuetooth adpater. Expetected something like "hci0".')
+        iface = int(m.group(1))
         self._peripheral = Peripheral(mac, iface=iface)
 
     def disconnect(self):
