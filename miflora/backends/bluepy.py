@@ -1,4 +1,5 @@
 """Backend for Miflora using the bluepy library."""
+import re
 from miflora.backends import AbstractBackend, BluetoothBackendException
 
 
@@ -13,8 +14,9 @@ class BluepyBackend(AbstractBackend):
     def connect(self, mac):
         """Connect to a device."""
         from bluepy.btle import Peripheral
-
-        self._peripheral = Peripheral(mac)
+        m = re.search(r'hci([\d]+)', self.adapter)
+        iface = m.group(1)
+        self._peripheral = Peripheral(mac, iface=iface)
 
     def disconnect(self):
         """Disconnect from a device."""
