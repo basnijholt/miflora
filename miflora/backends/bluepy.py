@@ -16,7 +16,8 @@ class BluepyBackend(AbstractBackend):
         from bluepy.btle import Peripheral
         m = re.search(r'hci([\d]+)', self.adapter)
         if m is None:
-            raise ValueError('Invalid pattern for BLuetooth adpater. Expetected something like "hci0".')
+            raise ValueError('Invalid pattern "{}" for BLuetooth adpater. '
+                             'Expetected something like "hci0".'.format(self.adapter))
         iface = int(m.group(1))
         self._peripheral = Peripheral(mac, iface=iface)
 
