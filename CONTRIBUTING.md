@@ -1,3 +1,7 @@
+# Build status:
+[![Build Status](https://travis-ci.org/open-homeautomation/miflora.svg?branch=master)](https://travis-ci.org/open-homeautomation/miflora)
+[![Coverage Status](https://coveralls.io/repos/github/open-homeautomation/miflora/badge.svg?branch=master)](https://coveralls.io/github/open-homeautomation/miflora?branch=master)
+
 # Testing
 The project uses [tox](https://tox.readthedocs.io/en/latest/) for automated testing and dependency mangement and 
 [pytest](https://docs.pytest.org/en/latest/) as test framework.
