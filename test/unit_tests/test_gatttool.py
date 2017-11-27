@@ -17,7 +17,7 @@ class TestGatttool(unittest.TestCase):
     @mock.patch('miflora.backends.gatttool.Popen')
     def test_read_handle_ok(self, popen_mock):
         """Test reading handle successfully."""
-        gattoutput = [0x00, 0x11, 0xAA, 0xFF]
+        gattoutput = bytes([0x00, 0x11, 0xAA, 0xFF])
         _configure_popenmock(popen_mock, 'Characteristic value/descriptor: 00 11 AA FF')
         be = GatttoolBackend()
         be.connect(TEST_MAC)

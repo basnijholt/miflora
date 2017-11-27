@@ -101,6 +101,14 @@ class TestMifloraPoller(unittest.TestCase):
 
         self.assertEqual(backend.name, poller.name())
 
+    def test_negative_temperature(self):
+        """Test with negative temperature."""
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        backend = self._get_backend(poller)
+        backend.handle_0x35_raw = bytes(b'\x53\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x02\x3C\x00\xFB\x34\x9B')
+        print(backend.handle_0x35_raw)
+        self.assertAlmostEqual(-17.3, poller.parameter_value(MI_TEMPERATURE), delta=0.01)
+
     @staticmethod
     def _get_backend(poller):
         """Get the backend from a MiFloraPoller object."""

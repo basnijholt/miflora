@@ -136,7 +136,7 @@ class GatttoolBackend(AbstractBackend):
             if res:
                 _LOGGER.debug(
                     "Exit read_ble with result (%s)", current_thread())
-                return [int(x, 16) for x in res.group(0).split()]
+                return bytes([int(x, 16) for x in res.group(0).split()])
 
             attempt += 1
             _LOGGER.debug("Waiting for %s seconds before retrying", delay)
