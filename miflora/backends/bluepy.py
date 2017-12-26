@@ -53,9 +53,9 @@ class BluepyBackend(AbstractBackend):
         try:
             import bluepy.btle  # noqa: F401
             return True
-        except ImportError:
-            _LOGGER.error('bluepy not found')
-            return False
+        except ImportError as e:
+            _LOGGER.error('bluepy not found: %s', str(e))
+        return False
 
     @staticmethod
     def scan_for_devices(timeout):

@@ -155,7 +155,7 @@ class GatttoolBackend(AbstractBackend):
         except OSError as e:
             msg = 'gatttool not found: {}'.format(str(e))
             _LOGGER.error(msg)
-            return False
+        return False
 
     @staticmethod
     def byte_to_handle(b):
