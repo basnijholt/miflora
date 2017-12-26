@@ -84,8 +84,7 @@ class AbstractBackend(object):
     def check_backend():
         """Check if the backend is available on the current system.
 
-        Does nothing if the backend is available, throws a BluetoothBackendException
-        if it's not available.
+        Returns True if the backend is available and False otherwise
         """
         raise NotImplementedError
 

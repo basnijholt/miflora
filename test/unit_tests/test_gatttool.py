@@ -94,15 +94,12 @@ class TestGatttool(unittest.TestCase):
     @mock.patch('miflora.backends.gatttool.call', return_value=None)
     def test_check_backend_ok(self, call_mock):
         """Test check_backend successfully."""
-        be = GatttoolBackend()
-        be.check_backend()
+        self.assertTrue(GatttoolBackend().check_backend())
 
     @mock.patch('miflora.backends.gatttool.call', **{'side_effect': IOError()})
     def test_check_backend_fail(self, call_mock):
         """Test check_backend with IOError being risen."""
-        be = GatttoolBackend()
-        with self.assertRaises(BluetoothBackendException):
-            be.check_backend()
+        self.assertFalse(GatttoolBackend().check_backend())
 
 
 def _configure_popenmock(popen_mock, output_string):
