@@ -35,4 +35,4 @@ class TestGatttoolBackend(unittest.TestCase):
             pass
 
     def test_check_backend(self):
-        self.backend.check_backend()
+        self.assertTrue(self.backend.check_backend())

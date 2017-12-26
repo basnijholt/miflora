@@ -80,7 +80,8 @@ class AbstractBackend(object):
     def read_handle(self, handle):
         raise NotImplementedError
 
-    def check_backend(self):
+    @staticmethod
+    def check_backend():
         """Check if the backend is available on the current system.
 
         Does nothing if the backend is available, throws a BluetoothBackendException
