@@ -25,10 +25,10 @@ class BluetoothInterface(object):
 
     def is_connected(self):
         """Check if we are connected to the sensor."""
-        return self.lock.locked() #pylint: disable=no-member
+        return self.lock.locked()  # pylint: disable=no-member
 
 
-class _BackendConnection(object): #pylint: disable=too-few-public-methods
+class _BackendConnection(object):  # pylint: disable=too-few-public-methods
     """Context Manager for a bluetooth connection.
 
     This creates the context for the connection and manages locking.
