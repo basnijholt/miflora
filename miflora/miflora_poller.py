@@ -168,7 +168,7 @@ class MiFloraPoller(object):
         """
         data = self._cache
         res = dict()
-        temp, res[MI_LIGHT] , res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
+        temp, res[MI_LIGHT], res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
             unpack('<hxhxxBhxxxxxx', data)
         res[MI_TEMPERATURE] = temp/10.0
         return res
