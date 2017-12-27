@@ -3,7 +3,6 @@
 import unittest
 from unittest import mock
 from miflora.backends.gatttool import GatttoolBackend
-from miflora.backends import BluetoothBackendException
 from test import TEST_MAC
 
 

@@ -9,7 +9,7 @@ import os
 import logging
 import re
 from subprocess import Popen, PIPE, TimeoutExpired, signal, call
-from miflora.backends import AbstractBackend, BluetoothBackendException
+from miflora.backends import AbstractBackend
 import time
 
 _LOGGER = logging.getLogger(__name__)
