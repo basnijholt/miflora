@@ -1,3 +1,4 @@
+"""Python package description."""
 from setuptools import setup, find_packages
 
 setup(name='miflora',
@@ -19,5 +20,5 @@ setup(name='miflora',
       packages=find_packages(),
       keywords='plant sensor bluetooth low-energy ble',
       zip_safe=False,
-      extras_require={'testing': ['pyest']}
-      )
+      extras_require={'testing': ['pytest']}
+     )

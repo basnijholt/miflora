@@ -1,6 +1,7 @@
-from miflora.backends import AbstractBackend
-
+"""Helper functions for unit tests."""
 from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY
+
+from miflora.backends import AbstractBackend
 
 
 class MockBackend(AbstractBackend):
@@ -13,7 +14,7 @@ class MockBackend(AbstractBackend):
     """
 
     def __init__(self, adapter='hci0'):
-        super(self.__class__, self).__init__(adapter)
+        super(MockBackend, self).__init__(adapter)
         self._version = (0, 0, 0)
         self.name = ''
         self.battery_level = 0

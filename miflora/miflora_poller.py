@@ -148,7 +148,7 @@ class MiFloraPoller(object):
                 return
         if sum(self._cache) == 0:
             self._cache = None
-            return None
+            return
 
     def _parse_data(self):
         """Parses the byte array returned by the sensor.
