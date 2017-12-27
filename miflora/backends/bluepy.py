@@ -48,6 +48,7 @@ class BluepyBackend(AbstractBackend):
         """Check if the backend is available."""
         try:
             import bluepy.btle  # noqa: F401 #pylint: disable=unused-variable
+            return True
         except ImportError:
             raise BluetoothBackendException('bluepy not found')
 
