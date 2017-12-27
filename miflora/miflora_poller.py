@@ -66,6 +66,7 @@ class MiFloraPoller(object):
                 return
 
             if firmware_version >= "2.6.6":
+                # for the newer models a magic number must be written before we can read the current data
                 if not connection.write_handle(_HANDLE_WRITE_MODE_CHANGE, _DATA_MODE_CHANGE):
                     # If a sensor doesn't work, wait 5 minutes before retrying
                     self._last_read = datetime.now() - self._cache_timeout + \
@@ -155,13 +156,21 @@ class MiFloraPoller(object):
 
         The sensor returns 16 bytes in total. It's unclear what the meaning of these bytes
         is beyond what is decoded in this method.
+
+        semantics of the data (in little endian encoding):
+        bytes 0-1: temperature in 0.1 °C
+        byte 2: unknown
+        bytes 3-4: brightness in Lux
+        bytes 5-6: unknown
+        byte 7: conductivity in µS/cm
+        byte 8-9: brightness in Lux
+        bytes 10-15: unknown
         """
         data = self._cache
         res = dict()
-        res[MI_TEMPERATURE] = unpack('<h', data[0:2])[0] / 10.0
-        res[MI_MOISTURE] = data[7]
-        res[MI_LIGHT] = data[4] * 256 + data[3]
-        res[MI_CONDUCTIVITY] = data[9] * 256 + data[8]
+        temp, res[MI_LIGHT] , res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
+            unpack('<hxhxxBhxxxxxx', data)
+        res[MI_TEMPERATURE] = temp/10.0
         return res
 
     @staticmethod
