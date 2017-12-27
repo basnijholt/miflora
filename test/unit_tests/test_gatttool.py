@@ -2,9 +2,9 @@
 
 import unittest
 from unittest import mock
+from test import TEST_MAC
 from miflora.backends.gatttool import GatttoolBackend
 from miflora.backends import BluetoothBackendException
-from test import TEST_MAC
 
 
 class TestGatttool(unittest.TestCase):
@@ -13,102 +13,107 @@ class TestGatttool(unittest.TestCase):
     These tests do NOT require hardware!
     time.sleep is mocked in some cases to speed up the retry-feature.
     """
+    # access to protected members is fine in testing
+    # pylint: disable = protected-access
+
+    # arguments of mock.patch are not always used
+    # pylint: disable = unused-argument
 
     @mock.patch('miflora.backends.gatttool.Popen')
     def test_read_handle_ok(self, popen_mock):
         """Test reading handle successfully."""
         gattoutput = bytes([0x00, 0x11, 0xAA, 0xFF])
         _configure_popenmock(popen_mock, 'Characteristic value/descriptor: 00 11 AA FF')
-        be = GatttoolBackend()
-        be.connect(TEST_MAC)
-        result = be.read_handle(0xFF)
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
+        result = backend.read_handle(0xFF)
         self.assertEqual(gattoutput, result)
 
     def test_run_connect_disconnect(self):
         """Just run connect and disconnect"""
-        be = GatttoolBackend()
-        be.connect(TEST_MAC)
-        self.assertEqual(TEST_MAC, be._mac)
-        be.disconnect()
-        self.assertEqual(None, be._mac)
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
+        self.assertEqual(TEST_MAC, backend._mac)
+        backend.disconnect()
+        self.assertEqual(None, backend._mac)
 
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
-    def test_read_handle_empty_output(self, time_mock, popen_mock):
+    def test_read_handle_empty_output(self, _, popen_mock):
         """Test reading handle where no result is returned."""
         _configure_popenmock(popen_mock, '')
-        be = GatttoolBackend()
-        be.connect(TEST_MAC)
-        result = be.read_handle(0xFF)
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
+        result = backend.read_handle(0xFF)
         self.assertIsNone(result)
 
     @mock.patch('miflora.backends.gatttool.Popen')
     def test_read_handle_wrong_handle(self, popen_mock):
         """Test reading invalid handle."""
         _configure_popenmock(popen_mock, 'Characteristic value/descriptor read failed: Invalid handle')
-        be = GatttoolBackend()
-        be.connect(TEST_MAC)
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
         with self.assertRaises(ValueError):
-            be.read_handle(0xFF)
+            backend.read_handle(0xFF)
 
     def test_read_not_connected(self):
         """Test reading data when not connected."""
-        be = GatttoolBackend()
+        backend = GatttoolBackend()
         with self.assertRaises(ValueError):
-            be.read_handle(0xFF)
+            backend.read_handle(0xFF)
 
     def test_write_not_connected(self):
         """Test writing data when not connected."""
-        be = GatttoolBackend()
+        backend = GatttoolBackend()
         with self.assertRaises(ValueError):
-            be.write_handle(0xFF, [0x00])
+            backend.write_handle(0xFF, [0x00])
 
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
     def test_write_handle_ok(self, time_mock, popen_mock):
         """Test writing to a handle successfully."""
         _configure_popenmock(popen_mock, 'Characteristic value was written successfully')
-        be = GatttoolBackend()
-        be.connect(TEST_MAC)
-        self.assertTrue(be.write_handle(0xFF, b'\X00\X10\XFF'))
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
+        self.assertTrue(backend.write_handle(0xFF, b'\x00\x10\xFF'))
 
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
     def test_write_handle_wrong_handle(self, time_mock, popen_mock):
         """Test writing to a non-writable handle."""
         _configure_popenmock(popen_mock, "Characteristic Write Request failed: Attribute can't be written")
-        be = GatttoolBackend()
-        be.connect(TEST_MAC)
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
         with self.assertRaises(ValueError):
-            be.write_handle(0xFF, b'\X00\X10\XFF')
+            backend.write_handle(0xFF, b'\x00\x10\xFF')
 
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
     def test_write_handle_no_answer(self, time_mock, popen_mock):
         """Test writing to a handle when no result is returned."""
         _configure_popenmock(popen_mock, '')
-        be = GatttoolBackend()
-        be.connect(TEST_MAC)
-        self.assertFalse(be.write_handle(0xFF, b'\X00\X10\XFF'))
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
+        self.assertFalse(backend.write_handle(0xFF, b'\x00\x10\xFF'))
 
     @mock.patch('miflora.backends.gatttool.call', return_value=None)
     def test_check_backend_ok(self, call_mock):
         """Test check_backend successfully."""
-        be = GatttoolBackend()
-        be.check_backend()
+        backend = GatttoolBackend()
+        self.assertTrue(backend.check_backend())
 
     @mock.patch('miflora.backends.gatttool.call', **{'side_effect': IOError()})
     def test_check_backend_fail(self, call_mock):
         """Test check_backend with IOError being risen."""
-        be = GatttoolBackend()
+        backend = GatttoolBackend()
         with self.assertRaises(BluetoothBackendException):
-            be.check_backend()
+            backend.check_backend()
 
 
 def _configure_popenmock(popen_mock, output_string):
     """Helper function to create a mock for Popen."""
-    m = mock.Mock()
-    m.communicate.return_value = [
+    match_result = mock.Mock()
+    match_result.communicate.return_value = [
         bytes(output_string, encoding='UTF-8'),
         bytes('random text', encoding='UTF-8')]
-    popen_mock.return_value.__enter__.return_value = m
+    popen_mock.return_value.__enter__.return_value = match_result

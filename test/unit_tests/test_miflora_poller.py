@@ -1,13 +1,17 @@
 """Tests for the miflora_poller module."""
-from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY
-
 import unittest
 from test.helper import MockBackend
 from test import HANDLE_WRITE_MODE_CHANGE, HANDLE_READ_SENSOR_DATA, INVALID_DATA
 
+from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY
+
 
 class TestMifloraPoller(unittest.TestCase):
     """Tests for the MiFloraPoller class."""
+
+    # access to protected members is fine in testing
+    # pylint: disable = protected-access
+
     TEST_MAC = '11:22:33:44:55:66'
 
     def test_format_bytes(self):
@@ -31,7 +35,7 @@ class TestMifloraPoller(unittest.TestCase):
         self.assertEqual('1.2.3', poller.firmware_version())
         self.assertEqual(0, len(backend.written_handles))
 
-    def test_read_measurements_old_version(self):
+    def test_read_old_version(self):
         """Test reading data from old sensors.
 
         Old means: version < 2.6.6

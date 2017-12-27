@@ -1,4 +1,5 @@
-"""
+""" Backend using gatttool.
+
 Reading from the sensor is handled by the command line tool "gatttool" that
 is part of bluez on Linux.
 No other operating systems are supported at the moment
@@ -9,13 +10,14 @@ import os
 import logging
 import re
 from subprocess import Popen, PIPE, TimeoutExpired, signal, call
-from miflora.backends import AbstractBackend, BluetoothBackendException
 import time
+from miflora.backends import AbstractBackend, BluetoothBackendException
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class GatttoolBackend(AbstractBackend):
+    """ Backend using gatttool."""
 
     def __init__(self, adapter='hci0', retries=3, timeout=20):
         super(GatttoolBackend, self).__init__(adapter)
@@ -25,19 +27,25 @@ class GatttoolBackend(AbstractBackend):
         self._mac = None
 
     def connect(self, mac):
-        # connection handling is not required when using gatttool, but we still need the mac
+        """Connect to sensor.
+
+        Connection handling is not required when using gatttool, but we still need the mac
+        """
         self._mac = mac
 
     def disconnect(self):
-        # connection handling is not required when using gatttool
+        """Disconnect from sensor.
+
+        Connection handling is not required when using gatttool.
+        """
         self._mac = None
 
     def is_connected(self):
+        """Check if we are connected to the backend."""
         return self._mac is not None
 
     def write_handle(self, handle, value):
-        """
-        Read from a BLE address
+        """Read from a BLE address.
 
         @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
         @param: handle - BLE characteristics handle in format 0xXX
@@ -74,7 +82,7 @@ class GatttoolBackend(AbstractBackend):
 
             result = result.decode("utf-8").strip(' \n\t')
             if "Write Request failed" in result:
-                raise ValueError('Error writing handls to sensor: %s', result)
+                raise ValueError('Error writing handls to sensor: {}'.format(result))
             _LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
             if "successfully" in result:
@@ -92,8 +100,7 @@ class GatttoolBackend(AbstractBackend):
         return False
 
     def read_handle(self, handle):
-        """
-        Read from a BLE address
+        """Read from a BLE address.
 
         @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
         @param: handle - BLE characteristics handle in format 0xXX
@@ -130,7 +137,7 @@ class GatttoolBackend(AbstractBackend):
             _LOGGER.debug("Got \"%s\" from gatttool", result)
             # Parse the output
             if "read failed" in result:
-                raise ValueError("Read error from gatttool: %s", result)
+                raise ValueError("Read error from gatttool: {}".format(result))
 
             res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
             if res:
@@ -148,20 +155,23 @@ class GatttoolBackend(AbstractBackend):
         return None
 
     def check_backend(self):
+        """Check if gatttool is available on the system."""
         try:
             call('gatttool', stdout=PIPE, stderr=PIPE)
             return True
-        except OSError as e:
-            msg = 'gatttool not found: {}'.format(str(e))
+        except OSError as os_err:
+            msg = 'gatttool not found: {}'.format(str(os_err))
             _LOGGER.error(msg)
             raise BluetoothBackendException(msg)
 
     @staticmethod
-    def byte_to_handle(b):
-        return '0x'+'{:02x}'.format(b).upper()
+    def byte_to_handle(in_byte):
+        """Convert a byte array to a handle string."""
+        return '0x'+'{:02x}'.format(in_byte).upper()
 
     @staticmethod
     def bytes_to_string(raw_data, prefix=False):
+        """Convert a byte array to a hex string."""
         prefix_string = ''
         if prefix:
             prefix_string = '0x'
