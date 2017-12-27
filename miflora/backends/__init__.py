@@ -1,3 +1,4 @@
+"""Bluetooth Backends available for miflora."""
 from threading import Lock
 
 
@@ -41,7 +42,6 @@ class _BackendConnection(object):
         return self._bt_interface.backend
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # TODO: find out what the arguments are good for...
         self._bt_interface.backend.disconnect()
         self._bt_interface.lock.release()
 
