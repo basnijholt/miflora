@@ -8,6 +8,7 @@ from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
 from miflora.backends.gatttool import GatttoolBackend
 from miflora.backends.bluepy import BluepyBackend
+from miflora.backends.pygatt import PygattBackend
 from miflora import miflora_scanner
 
 
@@ -38,7 +39,7 @@ def scan(args, backend):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--backend', choices=['gatttool', 'bluepy'], default='gatttool')
+parser.add_argument('--backend', choices=['gatttool', 'bluepy', 'pygatt'], default='gatttool')
 parser.add_argument('-v', '--verbose', action='store_const', const=True)
 subparsers = parser.add_subparsers(help='sub-command help')
 
@@ -56,6 +57,8 @@ if args.backend == 'gatttool':
     backend = GatttoolBackend
 elif args.backend == 'bluepy':
     backend = BluepyBackend
+elif args.backend == 'pygatt':
+    backend = PygattBackend
 else:
     raise Exception('unknown backend: {}'.format(args.backend))
 
