@@ -32,7 +32,8 @@ offers support for two Bluetooth implementations:
 
 ### bluez/gatttool wrapper
 To use the bluez wrapper, you need to install the bluez tools on your machine. No additional python 
-libraries are required.
+libraries are required. Some distrubutions moved the gatttool binary to a separate package. Make sure you have this 
+binaray available on your machine.
 
 Example to use the bluez/gatttool wrapper:
 ```python
@@ -43,15 +44,28 @@ poller = MiFloraPoller('some mac address', GatttoolBackend)
 ```
 
 ### bluepy
-To use the bluepy library you have to install it on your machine, in most cases this can be done via: 
+To use the [bluepy](https://github.com/IanHarvey/bluepy) library you have to install it on your machine, in most cases this can be done via: 
 ```pip3 install bluepy``` 
 
-Example to use the bluez/gatttool wrapper:
+Example to use the bluepy backend:
 ```python
 from miflora.miflora_poller import MiFloraPoller
 from miflora.backends.bluepy import BluepyBackend
 
 poller = MiFloraPoller('some mac address', BluepyBackend)
+```
+
+### pygatt
+If you have a Blue Giga based device that is supported by [pygatt](https://github.com/peplin/pygatt), you have to
+install the bluepy library on your machine. In most cases this can be done via: 
+```pip3 install pygatt``` 
+
+Example to use the pygatt backend:
+```python
+from miflora.miflora_poller import MiFloraPoller
+from miflora.backends.pygatt import PygattBackend
+
+poller = MiFloraPoller('some mac address', PygattBackend)
 ```
 
 ## Conttributing
