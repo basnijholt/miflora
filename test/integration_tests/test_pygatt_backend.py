@@ -12,4 +12,3 @@ class TestPyGattBackend(TestGatttoolBackend):
 
     def setUp(self):
         self.backend = PygattBackend()
-

@@ -55,7 +55,7 @@ class PygattBackend(AbstractBackend):
     def check_backend(self):
         """Check if the backend is available."""
         try:
-            import pygatt
+            import pygatt  # noqa: F401
             return True
         except ImportError:
             return False
