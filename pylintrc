@@ -1,0 +1,5 @@
+[MESSAGES CONTROL]
+disable = abstract-method, too-many-instance-attributes, too-many-arguments
+
+[FORMAT]
+max-line-length=120

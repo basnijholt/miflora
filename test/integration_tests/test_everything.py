@@ -1,3 +1,4 @@
+"""End to End test cases for MiFlora."""
 import unittest
 import pytest
 from miflora.miflora_poller import (MiFloraPoller, MI_CONDUCTIVITY,
@@ -8,8 +9,11 @@ from miflora.backends.bluepy import BluepyBackend
 
 class TestEverythingGatt(unittest.TestCase):
     """End to End test cases for MiFlora."""
+    # pylint does not understand pytest fixtures, so we have to disable the warning
+    # pylint: disable=no-member
 
     def setUp(self):
+        """Setup test environment."""
         self.backend_type = GatttoolBackend
 
     @pytest.mark.usefixtures("mac")
@@ -34,4 +38,5 @@ class TestEverythingBluepy(TestEverythingGatt):
     """Run the same tests as in the gatttool test"""
 
     def setUp(self):
+        """Setup test environment."""
         self.backend_type = BluepyBackend

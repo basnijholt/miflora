@@ -11,17 +11,17 @@ class BluepyBackend(AbstractBackend):
 
     def __init__(self, adapter='hci0'):
         """Create new instance of the backend."""
-        super(self.__class__, self).__init__(adapter)
+        super(BluepyBackend, self).__init__(adapter)
         self._peripheral = None
 
     def connect(self, mac):
         """Connect to a device."""
         from bluepy.btle import Peripheral
-        m = re.search(r'hci([\d]+)', self.adapter)
-        if m is None:
+        match_result = re.search(r'hci([\d]+)', self.adapter)
+        if match_result is None:
             raise ValueError('Invalid pattern "{}" for BLuetooth adpater. '
                              'Expetected something like "hci0".'.format(self.adapter))
-        iface = int(m.group(1))
+        iface = int(match_result.group(1))
         self._peripheral = Peripheral(mac, iface=iface)
 
     def disconnect(self):
@@ -51,10 +51,10 @@ class BluepyBackend(AbstractBackend):
     def check_backend():
         """Check if the backend is available."""
         try:
-            import bluepy.btle  # noqa: F401
+            import bluepy.btle  # noqa: F401 #pylint: disable=unused-variable
             return True
-        except ImportError as e:
-            _LOGGER.error('bluepy not found: %s', str(e))
+        except ImportError as importerror:
+            _LOGGER.error('bluepy not found: %s', str(importerror))
         return False
 
     @staticmethod

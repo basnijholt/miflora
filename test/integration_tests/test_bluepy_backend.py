@@ -1,6 +1,9 @@
-from miflora.backends.bluepy import BluepyBackend
+"""Run the same tests as in TestGatttoolBackend.
 
+Just use a different backend.
+"""
 from test.integration_tests.test_gatttool_backend import TestGatttoolBackend
+from miflora.backends.bluepy import BluepyBackend
 
 
 class TestBluepyBackend(TestGatttoolBackend):
@@ -10,6 +13,7 @@ class TestBluepyBackend(TestGatttoolBackend):
     """
 
     def setUp(self):
+        """Set up the test environment."""
         self.backend = BluepyBackend()
 
     def test_scan(self):
@@ -20,5 +24,5 @@ class TestBluepyBackend(TestGatttoolBackend):
         """
         devices = BluepyBackend.scan_for_devices(5)
         self.assertGreater(len(devices), 0)
-        for d in devices:
-            self.assertIsNotNone(d)
+        for device in devices:
+            self.assertIsNotNone(device)

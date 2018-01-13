@@ -1,17 +1,18 @@
+"""Tests for the BluetoothInterface class."""
 import unittest
-
-from miflora.backends import BluetoothInterface
-
 from test.helper import MockBackend
+from miflora.backends import BluetoothInterface
 
 
 class TestBluetoothInterface(unittest.TestCase):
+    """Tests for the BluetoothInterface class."""
 
     def test_context_manager_locking(self):
-        bt = BluetoothInterface(MockBackend)
-        self.assertFalse(bt.is_connected())
+        """Test the usage of the with statement."""
+        bluetooth_if = BluetoothInterface(MockBackend)
+        self.assertFalse(bluetooth_if.is_connected())
 
-        with bt.connect('abc'):  # as connection:
-            self.assertTrue(bt.is_connected())
+        with bluetooth_if.connect('abc'):  # as connection:
+            self.assertTrue(bluetooth_if.is_connected())
 
-        self.assertFalse(bt.is_connected())
+        self.assertFalse(bluetooth_if.is_connected())

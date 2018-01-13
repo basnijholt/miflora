@@ -1,0 +1,10 @@
+#!/bin/bash
+# simple script to run the integration tests
+# 
+# - tests need to run as root so we can scan for new devices
+# - store the mac address of the device you're using in a file
+#   called ".test_mac" so you can run the test with one call.
+
+MAC=`cat .test_mac` 
+sudo tox -e integration_tests -- --mac=$MAC
+

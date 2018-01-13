@@ -1,3 +1,4 @@
+"""Constants unsed in the tests."""
 
 HANDLE_READ_VERSION_BATTERY = 0x38
 HANDLE_READ_NAME = 0x03
