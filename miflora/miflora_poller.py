@@ -38,7 +38,7 @@ class MiFloraPoller(object):
         self._cache = None
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
-        self._fw_last_read = datetime.now()
+        self._fw_last_read = None
         self.retries = retries
         self.ble_timeout = 10
         self.lock = Lock()
@@ -76,7 +76,7 @@ class MiFloraPoller(object):
             _LOGGER.debug('Received result for handle %s: %s',
                           _HANDLE_READ_SENSOR_DATA, self._format_bytes(self._cache))
             self._check_data()
-            if self._cache is not None:
+            if self.cache_available():
                 self._last_read = datetime.now()
             else:
                 # If a sensor doesn't work, wait 5 minutes before retrying
@@ -132,24 +132,37 @@ class MiFloraPoller(object):
                               datetime.now() - self._last_read,
                               self._cache_timeout)
 
-        if self._cache and (len(self._cache) == 16):
+        if self.cache_available() and (len(self._cache) == 16):
             return self._parse_data()[parameter]
         else:
             raise IOError("Could not read data from Mi Flora sensor %s" % self._mac)
 
     def _check_data(self):
-        if self._cache is None:
+        """Ensure that the data in the cache is valid.
+
+        If it's invalid, the cache is wiped.
+        """
+        if not self.cache_available():
             return
         if self._cache[7] > 100:  # moisture over 100 procent
-            self._cache = None
+            self.clear_cache()
             return
         if self._firmware_version >= "2.6.6":
             if sum(self._cache[10:]) == 0:
-                self._cache = None
+                self.clear_cache()
                 return
         if sum(self._cache) == 0:
-            self._cache = None
+            self.clear_cache()
             return
+
+    def clear_cache(self):
+        """Manually force the cache to be cleared."""
+        self._cache = None
+        self._last_read = None
+
+    def cache_available(self):
+        """Check if there is data in the cache."""
+        return self._cache is not None
 
     def _parse_data(self):
         """Parses the byte array returned by the sensor.
