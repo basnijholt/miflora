@@ -1,3 +1,4 @@
+"""Bluetooth Backends available for miflora."""
 from threading import Lock
 
 
@@ -15,17 +16,19 @@ class BluetoothInterface(object):
         self.backend.check_backend()
 
     def __del__(self):
-        if self.lock.locked():
+        if self.is_connected():
             self.backend.disconnect()
 
     def connect(self, mac):
+        """Connect to the sensor."""
         return _BackendConnection(self, mac)
 
     def is_connected(self):
-        return self.lock.locked()
+        """Check if we are connected to the sensor."""
+        return self.lock.locked()  # pylint: disable=no-member
 
 
-class _BackendConnection(object):
+class _BackendConnection(object):  # pylint: disable=too-few-public-methods
     """Context Manager for a bluetooth connection.
 
     This creates the context for the connection and manages locking.
@@ -41,12 +44,14 @@ class _BackendConnection(object):
         return self._bt_interface.backend
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # TODO: find out what the arguments are good for...
         self._bt_interface.backend.disconnect()
         self._bt_interface.lock.release()
 
 
 class BluetoothBackendException(Exception):
+    """Exception thrown by the different backends.
+
+    This is a wrapper for other exception specific to each library."""
     pass
 
 
@@ -78,13 +83,16 @@ class AbstractBackend(object):
         raise NotImplementedError
 
     def read_handle(self, handle):
+        """Read a handle from the sensor.
+
+        You must be connected to a device first."""
         raise NotImplementedError
 
-    def check_backend(self):
+    @staticmethod
+    def check_backend():
         """Check if the backend is available on the current system.
 
-        Does nothing if the backend is available, throws a BluetoothBackendException
-        if it's not available.
+        Returns True if the backend is available and False otherwise
         """
         raise NotImplementedError
 
