@@ -5,8 +5,8 @@ This is also some end-to-end testing.
 import subprocess
 import os
 import unittest
-import pytest
 import time
+import pytest
 
 
 class TestDemoPy(unittest.TestCase):

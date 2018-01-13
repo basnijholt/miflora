@@ -3,7 +3,6 @@ from test.integration_tests.test_gatttool_backend import TestGatttoolBackend
 from miflora.backends.pygatt import PygattBackend
 
 
-
 class TestPyGattBackend(TestGatttoolBackend):
     """Run the same tests as in TestGatttoolBackend.
 
