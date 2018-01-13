@@ -53,8 +53,8 @@ class BluepyBackend(AbstractBackend):
         try:
             import bluepy.btle  # noqa: F401 #pylint: disable=unused-variable
             return True
-        except ImportError as e:
-            _LOGGER.error('bluepy not found: %s', str(e))
+        except ImportError as importerror:
+            _LOGGER.error('bluepy not found: %s', str(importerror))
         return False
 
     @staticmethod

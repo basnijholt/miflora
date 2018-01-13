@@ -1,9 +1,9 @@
 """Unit tests for the bluepy backend."""
-from miflora.backends.bluepy import BluepyBackend
 
 import unittest
 from unittest import mock
 from test import TEST_MAC
+from miflora.backends.bluepy import BluepyBackend
 
 
 class TestBluepy(unittest.TestCase):
@@ -36,4 +36,4 @@ class TestBluepy(unittest.TestCase):
         """Test check_backend successfully."""
         self.assertTrue(BluepyBackend.check_backend())
 
-    # TODO: find a way to test check_backend with an import error
+    # find a way to test check_backend with an import error

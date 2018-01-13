@@ -2,8 +2,8 @@
 
 import unittest
 from unittest import mock
-from miflora.backends.gatttool import GatttoolBackend
 from test import TEST_MAC
+from miflora.backends.gatttool import GatttoolBackend
 
 
 class TestGatttool(unittest.TestCase):

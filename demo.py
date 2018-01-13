@@ -52,7 +52,7 @@ def _get_backend(args):
     return backend
 
 
-def list_backends(args):
+def list_backends(_):
     """List all available backends."""
     backends = [b.__name__ for b in available_backends()]
     print('\n'.join(backends))

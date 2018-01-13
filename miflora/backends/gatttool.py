@@ -8,9 +8,9 @@ from threading import current_thread
 import os
 import logging
 import re
+import time
 from subprocess import Popen, PIPE, TimeoutExpired, signal, call
 from miflora.backends import AbstractBackend
-import time
 
 _LOGGER = logging.getLogger(__name__)
 

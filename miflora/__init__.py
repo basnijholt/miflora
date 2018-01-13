@@ -11,8 +11,8 @@ if sys.version_info <= (3, 4):
                          sys.executable))
 
 
-from miflora.backends.bluepy import BluepyBackend  # noqa: E402
-from miflora.backends.gatttool import GatttoolBackend  # noqa: E402
+from miflora.backends.bluepy import BluepyBackend  # noqa: E402 # pylint: disable=wrong-import-position
+from miflora.backends.gatttool import GatttoolBackend  # noqa: E402 # pylint: disable=wrong-import-position
 _ALL_BACKENDS = [BluepyBackend, GatttoolBackend]
 
 
