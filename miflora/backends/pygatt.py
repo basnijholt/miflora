@@ -52,7 +52,8 @@ class PygattBackend(AbstractBackend):
         self._device.char_write_handle(handle, value, True)
         return True
 
-    def check_backend(self):
+    @staticmethod
+    def check_backend():
         """Check if the backend is available."""
         try:
             import pygatt  # noqa: F401 # pyline: disable=unused-variable
