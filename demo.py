@@ -7,9 +7,7 @@ import logging
 
 from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
-from miflora.backends.gatttool import GatttoolBackend
-from miflora.backends.bluepy import BluepyBackend
-from miflora import miflora_scanner
+from miflora import miflora_scanner, available_backends, BluepyBackend, GatttoolBackend
 
 
 def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
@@ -19,8 +17,9 @@ def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-
     return mac
 
 
-def poll(args, backend):
+def poll(args):
     """Poll data from the sensor."""
+    backend = _get_backend(args)
     poller = MiFloraPoller(args.mac, backend)
     print("Getting data from Mi Flora")
     print("FW: {}".format(poller.firmware_version()))
@@ -32,13 +31,31 @@ def poll(args, backend):
     print("Battery: {}".format(poller.parameter_value(MI_BATTERY)))
 
 
-def scan(_, backend):
+def scan(args):
     """Scan for sensors."""
+    backend = _get_backend(args)
     print('Scanning for 10 seconds...')
     devices = miflora_scanner.scan(backend, 10)
     print('Found {} devices:'.format(len(devices)))
     for device in devices:
         print('  {}'.format(device))
+
+
+def _get_backend(args):
+    """Extract the backend class from the command line arguments."""
+    if args.backend == 'gatttool':
+        backend = GatttoolBackend
+    elif args.backend == 'bluepy':
+        backend = BluepyBackend
+    else:
+        raise Exception('unknown backend: {}'.format(args.backend))
+    return backend
+
+
+def list_backends(args):
+    """List all available backends."""
+    backends = [b.__name__ for b in available_backends()]
+    print('\n'.join(backends))
 
 
 def main():
@@ -58,20 +75,14 @@ def main():
     parser_scan = subparsers.add_parser('scan', help='scan for devices')
     parser_scan.set_defaults(func=scan)
 
-    args = parser.parse_args()
+    parser_scan = subparsers.add_parser('backends', help='list the available backends')
+    parser_scan.set_defaults(func=list_backends)
 
-    if args.backend == 'gatttool':
-        backend = GatttoolBackend
-    elif args.backend == 'bluepy':
-        backend = BluepyBackend
-    else:
-        raise Exception('unknown backend: {}'.format(args.backend))
+    args = parser.parse_args()
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
-
-    args.func(args, backend)
-
+    args.func(args)
 
 if __name__ == '__main__':
     main()

@@ -2,9 +2,8 @@
 
 import unittest
 from unittest import mock
-from test import TEST_MAC
 from miflora.backends.gatttool import GatttoolBackend
-from miflora.backends import BluetoothBackendException
+from test import TEST_MAC
 
 
 class TestGatttool(unittest.TestCase):
@@ -99,15 +98,12 @@ class TestGatttool(unittest.TestCase):
     @mock.patch('miflora.backends.gatttool.call', return_value=None)
     def test_check_backend_ok(self, call_mock):
         """Test check_backend successfully."""
-        backend = GatttoolBackend()
-        self.assertTrue(backend.check_backend())
+        self.assertTrue(GatttoolBackend().check_backend())
 
     @mock.patch('miflora.backends.gatttool.call', **{'side_effect': IOError()})
     def test_check_backend_fail(self, call_mock):
         """Test check_backend with IOError being risen."""
-        backend = GatttoolBackend()
-        with self.assertRaises(BluetoothBackendException):
-            backend.check_backend()
+        self.assertFalse(GatttoolBackend().check_backend())
 
 
 def _configure_popenmock(popen_mock, output_string):

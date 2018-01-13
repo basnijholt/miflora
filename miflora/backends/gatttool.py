@@ -1,5 +1,4 @@
-""" Backend using gatttool.
-
+"""
 Reading from the sensor is handled by the command line tool "gatttool" that
 is part of bluez on Linux.
 No other operating systems are supported at the moment
@@ -10,8 +9,8 @@ import os
 import logging
 import re
 from subprocess import Popen, PIPE, TimeoutExpired, signal, call
+from miflora.backends import AbstractBackend
 import time
-from miflora.backends import AbstractBackend, BluetoothBackendException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -154,7 +153,8 @@ class GatttoolBackend(AbstractBackend):
         _LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
         return None
 
-    def check_backend(self):
+    @staticmethod
+    def check_backend():
         """Check if gatttool is available on the system."""
         try:
             call('gatttool', stdout=PIPE, stderr=PIPE)
@@ -162,7 +162,7 @@ class GatttoolBackend(AbstractBackend):
         except OSError as os_err:
             msg = 'gatttool not found: {}'.format(str(os_err))
             _LOGGER.error(msg)
-            raise BluetoothBackendException(msg)
+        return False
 
     @staticmethod
     def byte_to_handle(in_byte):

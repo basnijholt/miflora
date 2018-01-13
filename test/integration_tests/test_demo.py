@@ -33,3 +33,11 @@ class TestDemoPy(unittest.TestCase):
         """Test scanning via bluepy."""
         cmd = './demo.py --backend bluepy scan'
         subprocess.check_call(cmd, shell=True, cwd=self.root_dir)
+
+    def test_list_backends(self):
+        """Test the list backends subcommand."""
+        cmd = './demo.py backends'
+        stdout = subprocess.check_output(cmd, shell=True, cwd=self.root_dir)
+        stdout = stdout.decode('utf-8')
+        self.assertIn('BluepyBackend', stdout)
+        self.assertIn('GatttoolBackend', stdout)
