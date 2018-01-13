@@ -6,6 +6,7 @@ import subprocess
 import os
 import unittest
 import pytest
+import time
 
 
 class TestDemoPy(unittest.TestCase):
@@ -35,6 +36,7 @@ class TestDemoPy(unittest.TestCase):
 
     @pytest.mark.usefixtures("mac")
     def test_pygatt_poll(self):
+        """Test polling via pygatt."""
         self.assertIsNotNone(self.mac)
         cmd = './demo.py --backend pygatt poll {}'.format(self.mac)
         subprocess.check_call(cmd, shell=True, cwd=self.root_dir)

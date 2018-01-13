@@ -1,7 +1,7 @@
 """Test the pygatt backend."""
+from test.integration_tests.test_gatttool_backend import TestGatttoolBackend
 from miflora.backends.pygatt import PygattBackend
 
-from test.integration_tests.test_gatttool_backend import TestGatttoolBackend
 
 
 class TestPyGattBackend(TestGatttoolBackend):

@@ -7,4 +7,5 @@
 
 MAC=`cat .test_mac` 
 sudo tox -e integration_tests -- --mac=$MAC
-
+# clean up the file system permissions after running the tests as root
+sudo chown $UID .cache .tox
