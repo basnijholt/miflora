@@ -4,10 +4,11 @@
 import argparse
 import re
 import logging
+import sys
 
 from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
-from miflora import miflora_scanner, available_backends, BluepyBackend, GatttoolBackend
+from miflora import miflora_scanner, available_backends, BluepyBackend, GatttoolBackend, PygattBackend
 
 
 def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
@@ -47,6 +48,8 @@ def _get_backend(args):
         backend = GatttoolBackend
     elif args.backend == 'bluepy':
         backend = BluepyBackend
+    elif args.backend == 'pygatt':
+        backend = PygattBackend
     else:
         raise Exception('unknown backend: {}'.format(args.backend))
     return backend
@@ -64,9 +67,9 @@ def main():
     Mostly parsing the command line arguments.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--backend', choices=['gatttool', 'bluepy'], default='gatttool')
+    parser.add_argument('--backend', choices=['gatttool', 'bluepy', 'pygatt'], default='gatttool')
     parser.add_argument('-v', '--verbose', action='store_const', const=True)
-    subparsers = parser.add_subparsers(help='sub-command help')
+    subparsers = parser.add_subparsers(help='sub-command help', )
 
     parser_poll = subparsers.add_parser('poll', help='poll data from a sensor')
     parser_poll.add_argument('mac', type=valid_miflora_mac)
@@ -82,6 +85,11 @@ def main():
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
+
+    if not hasattr(args, "func"):
+        parser.print_help()
+        sys.exit(0)
+
     args.func(args)
 
 
