@@ -1,6 +1,9 @@
 """Backend for Miflora using the bluepy library."""
 import re
+import logging
 from miflora.backends import AbstractBackend, BluetoothBackendException
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BluepyBackend(AbstractBackend):
@@ -44,12 +47,15 @@ class BluepyBackend(AbstractBackend):
             raise BluetoothBackendException('not connected to backend')
         return self._peripheral.writeCharacteristic(handle, value, True)
 
-    def check_backend(self):
+    @staticmethod
+    def check_backend():
         """Check if the backend is available."""
         try:
             import bluepy.btle  # noqa: F401
-        except ImportError:
-            raise BluetoothBackendException('bluepy not found')
+            return True
+        except ImportError as e:
+            _LOGGER.error('bluepy not found: %s', str(e))
+        return False
 
     @staticmethod
     def scan_for_devices(timeout):

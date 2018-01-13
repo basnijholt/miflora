@@ -9,7 +9,7 @@ import os
 import logging
 import re
 from subprocess import Popen, PIPE, TimeoutExpired, signal, call
-from miflora.backends import AbstractBackend, BluetoothBackendException
+from miflora.backends import AbstractBackend
 import time
 
 _LOGGER = logging.getLogger(__name__)
@@ -147,14 +147,15 @@ class GatttoolBackend(AbstractBackend):
         _LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
         return None
 
-    def check_backend(self):
+    @staticmethod
+    def check_backend():
         try:
             call('gatttool', stdout=PIPE, stderr=PIPE)
             return True
         except OSError as e:
             msg = 'gatttool not found: {}'.format(str(e))
             _LOGGER.error(msg)
-            raise BluetoothBackendException(msg)
+        return False
 
     @staticmethod
     def byte_to_handle(b):
