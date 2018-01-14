@@ -11,8 +11,6 @@ HANDLE_HISTORY_READ = 0x3c
 
 DATA_MODE_CHANGE = bytes([0xA0, 0x1F])
 
-
-
 TEST_MAC = '11:22:33:44:55:66'
 
 INVALID_DATA = b'\xaa\xbb\xcc\xdd\xee\xff\x99\x88\x77\x66\x00\x00\x00\x00\x00\x00'

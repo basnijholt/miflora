@@ -38,6 +38,7 @@ class TestEverythingGatt(unittest.TestCase):
         self.assertIsNotNone(poller.parameter_value(MI_CONDUCTIVITY))
         self.assertIsNotNone(poller.parameter_value(MI_BATTERY))
 
+
 class TestEverythingBluepy(TestEverythingGatt):
     """Run the same tests as in the gatttool test"""
 
