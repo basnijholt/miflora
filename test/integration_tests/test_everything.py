@@ -1,4 +1,5 @@
 """End to End test cases for MiFlora."""
+import time
 import unittest
 import pytest
 from miflora.miflora_poller import (MiFloraPoller, MI_CONDUCTIVITY,
@@ -10,6 +11,11 @@ class TestEverythingGatt(unittest.TestCase):
     """End to End test cases for MiFlora."""
     # pylint does not understand pytest fixtures, so we have to disable the warning
     # pylint: disable=no-member
+
+    @staticmethod
+    def setUpClass():
+        """Wait before testing different backends."""
+        time.sleep(1)
 
     def setUp(self):
         """Setup test environment."""
@@ -31,18 +37,6 @@ class TestEverythingGatt(unittest.TestCase):
         self.assertIsNotNone(poller.parameter_value(MI_LIGHT))
         self.assertIsNotNone(poller.parameter_value(MI_CONDUCTIVITY))
         self.assertIsNotNone(poller.parameter_value(MI_BATTERY))
-
-    @pytest.mark.usefixtures("mac")
-    def test_history(self):
-        """Test reading the device history.
-
-        This test only checks if no exception is thrown, as we do not know if the sensor has any history available
-        and what the data might be.
-        """
-        assert hasattr(self, "mac")
-        poller = MiFloraPoller(self.mac, self.backend_type)
-        history = poller.fetch_history()
-
 
 class TestEverythingBluepy(TestEverythingGatt):
     """Run the same tests as in the gatttool test"""

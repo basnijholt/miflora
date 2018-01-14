@@ -36,7 +36,11 @@ cmd_history_read_init = b'\xa0\x00\x00'
 cmd_history_read_success = b'\xa2\x00\x00'
 cmd_history_read_failed = b'\xa3\x00\x00'
 
-_INVALID_HISTORY_DATA = b'\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff'
+_INVALID_HISTORY_DATA = [
+    b'\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff',
+    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+]
+
 
 class MiFloraPoller(object):
     """"
@@ -225,11 +229,11 @@ class MiFloraPoller(object):
                     try:
                         connection.write_handle(handle_history_control, payload)
                         response = connection.read_handle(handle_history_read)
-                        if response == _INVALID_HISTORY_DATA:
-                            _LOGGER.error('Got invalid history data!')
-                        elif response != (0).to_bytes(16, BYTEORDER):  # Not invalid
-                            _LOGGER.debug("History item retrieved")
-                            data.append(HistoryEntry(response))
+                        if response in _INVALID_HISTORY_DATA:
+                            msg = 'Got invalid history data: {}'.format(response)
+                            _LOGGER.error(msg)
+                            raise ValueError(msg)
+                        data.append(HistoryEntry(response))
                     except Exception as e:
                         _LOGGER.debug("History read failed: %s", e)
                         connection.write_handle(handle_history_control, cmd_history_read_failed)
