@@ -1,5 +1,8 @@
 """Bluetooth Backends available for miflora."""
 from threading import Lock
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BluetoothInterface(object):
@@ -39,11 +42,13 @@ class _BackendConnection(object):  # pylint: disable=too-few-public-methods
         self.mac = mac
 
     def __enter__(self):
+        _LOGGER.debug('Connecting to device %s', self.mac)
         self._bt_interface.lock.acquire()
         self._bt_interface.backend.connect(self.mac)
         return self._bt_interface.backend
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        _LOGGER.debug('Disconnecting from device %s', self.mac)
         self._bt_interface.backend.disconnect()
         self._bt_interface.lock.release()
 

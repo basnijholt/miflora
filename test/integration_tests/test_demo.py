@@ -53,3 +53,11 @@ class TestDemoPy(unittest.TestCase):
         stdout = stdout.decode('utf-8')
         self.assertIn('BluepyBackend', stdout)
         self.assertIn('GatttoolBackend', stdout)
+
+    @pytest.mark.usefixtures("mac")
+    def test_history(self):
+        """Test the list backends subcommand."""
+        cmd = './demo.py history {}'.format(self.mac)
+        stdout = subprocess.check_output(cmd, shell=True, cwd=self.root_dir)
+        stdout = stdout.decode('utf-8')
+        self.assertIn('Getting history', stdout)

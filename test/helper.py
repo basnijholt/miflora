@@ -1,5 +1,8 @@
 """Helper functions for unit tests."""
-from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY
+
+from struct import unpack
+from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY, HANDLE_DEVICE_TIME, \
+    HANDLE_HISTORY_READ, HANDLE_HISTORY_CONTROL
 
 from miflora.backends import AbstractBackend
 
@@ -27,6 +30,10 @@ class MockBackend(AbstractBackend):
         self.override_read_handles = dict()
         self.is_available = True
         self.handle_0x35_raw = None
+        self.history_info = None
+        self.history_data = []
+        self.local_time = None
+        self._history_control = None
 
     def check_backend(self):
         """This backend is available when the field is set accordingly."""
@@ -51,12 +58,19 @@ class MockBackend(AbstractBackend):
             return self._read_sensor_data()
         elif handle == HANDLE_READ_NAME:
             return self._read_name()
+        elif handle == HANDLE_HISTORY_READ:
+            return self._read_history()
+        elif handle == HANDLE_DEVICE_TIME:
+            return self.local_time
         else:
             raise ValueError('handle not implemented in mockup')
 
     def write_handle(self, handle, value):
         """Writing handles just stores the results in a list."""
-        self.written_handles.append((handle, value))
+        if handle == HANDLE_HISTORY_CONTROL:
+            self._history_control = value
+        else:
+            self.written_handles.append((handle, value))
         return handle in self.expected_write_handles
 
     def _read_battery_version(self):
@@ -86,3 +100,15 @@ class MockBackend(AbstractBackend):
     def _read_name(self):
         """Convert the name into a byte array and return it."""
         return [ord(c) for c in self.name]
+
+    def _read_history(self):
+        """Read the history data with the index set in previous HISTORY_CONTROL operation."""
+        if self.history_data is None:
+            raise ValueError('history not set')
+        (cmd, index,) = unpack('<Bh', self._history_control)
+        if cmd == 0xA0:
+            return self.history_info
+        elif cmd == 0xA1:
+            return self.history_data[index]
+        else:
+            raise ValueError('Unknown command {}'.format(cmd))

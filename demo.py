@@ -61,13 +61,27 @@ def list_backends(_):
     print('\n'.join(backends))
 
 
+def history(args):
+    """Read the history from the sensor."""
+    backend = _get_backend(args)
+    print('Getting history from sensor...')
+    poller = MiFloraPoller(args.mac, backend)
+    history_list = poller.fetch_history()
+    for entry in history_list:
+        print('History from {}'.format(entry.wall_time))
+        print("    Temperature: {}".format(entry.temperature))
+        print("    Moisture: {}".format(entry.moisture))
+        print("    Light: {}".format(entry.light))
+        print("    Conductivity: {}".format(entry.conductivity))
+
+
 def main():
     """Main function.
 
     Mostly parsing the command line arguments.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--backend', choices=['gatttool', 'bluepy', 'pygatt'], default='gatttool')
+    parser.add_argument('--backend', choices=['gatttool', 'bluepy', 'pygatt'], default='bluepy')
     parser.add_argument('-v', '--verbose', action='store_const', const=True)
     subparsers = parser.add_subparsers(help='sub-command help', )
 
@@ -80,6 +94,10 @@ def main():
 
     parser_scan = subparsers.add_parser('backends', help='list the available backends')
     parser_scan.set_defaults(func=list_backends)
+
+    parser_history = subparsers.add_parser('history', help='get device history')
+    parser_history.add_argument('mac', type=valid_miflora_mac)
+    parser_history.set_defaults(func=history)
 
     args = parser.parse_args()
 
