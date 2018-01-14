@@ -31,7 +31,7 @@ class MockBackend(AbstractBackend):
         self.is_available = True
         self.handle_0x35_raw = None
         self.history_info = None
-        self.history_data = None
+        self.history_data = []
         self.local_time = None
         self._history_control = None
 
@@ -111,4 +111,4 @@ class MockBackend(AbstractBackend):
         elif cmd == 0xA1:
             return self.history_data[index]
         else:
-            raise ValueError('Unknown command %s', cmd)
+            raise ValueError('Unknown command {}'.format(cmd))

@@ -28,13 +28,13 @@ _LOGGER = logging.getLogger(__name__)
 
 BYTEORDER = 'little'
 
-handle_device_time = 0x41
-handle_history_control = 0x3e
-handle_history_read = 0x3c
+_HANDLE_DEVICE_TIME = 0x41
+_HANDLE_HISTORY_CONTROL = 0x3e
+_HANDLE_HISTORY_READ = 0x3c
 
-cmd_history_read_init = b'\xa0\x00\x00'
-cmd_history_read_success = b'\xa2\x00\x00'
-cmd_history_read_failed = b'\xa3\x00\x00'
+_CMD_HISTORY_READ_INIT = b'\xa0\x00\x00'
+_CMD_HISTORY_READ_SUCCESS = b'\xa2\x00\x00'
+_CMD_HISTORY_READ_FAILED = b'\xa3\x00\x00'
 
 _INVALID_HISTORY_DATA = [
     b'\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff',
@@ -93,7 +93,7 @@ class MiFloraPoller(object):
                     return
             self._cache = connection.read_handle(_HANDLE_READ_SENSOR_DATA)
             _LOGGER.debug('Received result for handle %s: %s',
-                          _HANDLE_READ_SENSOR_DATA, self._format_bytes(self._cache))
+                          _HANDLE_READ_SENSOR_DATA, self.format_bytes(self._cache))
             self._check_data()
             if self.cache_available():
                 self._last_read = datetime.now()
@@ -119,7 +119,7 @@ class MiFloraPoller(object):
             with self._bt_interface.connect(self._mac) as connection:
                 res = connection.read_handle(_HANDLE_READ_VERSION_BATTERY)
                 _LOGGER.debug('Received result for handle %s: %s',
-                              _HANDLE_READ_VERSION_BATTERY, self._format_bytes(res))
+                              _HANDLE_READ_VERSION_BATTERY, self.format_bytes(res))
             if res is None:
                 self.battery = 0
                 self._firmware_version = None
@@ -206,7 +206,7 @@ class MiFloraPoller(object):
         return res
 
     @staticmethod
-    def _format_bytes(raw_data):
+    def format_bytes(raw_data):
         """Prettyprint a byte array."""
         return ' '.join([format(c, "02x") for c in raw_data]).upper()
 
@@ -217,26 +217,26 @@ class MiFloraPoller(object):
         """
         data = []
         with self._bt_interface.connect(self._mac) as connection:
-            connection.write_handle(handle_history_control, cmd_history_read_init)
-            history_info = connection.read_handle(handle_history_read)
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_INIT)
+            history_info = connection.read_handle(_HANDLE_HISTORY_READ)
             _LOGGER.debug('history info raw: %s', history_info)
 
             history_length = int.from_bytes(history_info[0:2], BYTEORDER)
-            _LOGGER.info("Getting %d measurements" % history_length)
+            _LOGGER.info("Getting %d measurements", history_length)
             if history_length > 0:
                 for i in range(history_length):
                     payload = self._cmd_history_address(i)
                     try:
-                        connection.write_handle(handle_history_control, payload)
-                        response = connection.read_handle(handle_history_read)
+                        connection.write_handle(_HANDLE_HISTORY_CONTROL, payload)
+                        response = connection.read_handle(_HANDLE_HISTORY_READ)
                         if response in _INVALID_HISTORY_DATA:
                             msg = 'Got invalid history data: {}'.format(response)
                             _LOGGER.error(msg)
                             raise ValueError(msg)
                         data.append(HistoryEntry(response))
-                    except Exception as e:
-                        _LOGGER.debug("History read failed: %s", e)
-                        connection.write_handle(handle_history_control, cmd_history_read_failed)
+                    except Exception as exception:
+                        _LOGGER.debug("History read failed: %s", exception)
+                        connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_FAILED)
                         raise
                     _LOGGER.info("Progress: %d of %d", i+1, history_length)
 
@@ -254,7 +254,7 @@ class MiFloraPoller(object):
         Note: The data is deleted from the device. There is no way to recover it!
         """
         with self._bt_interface.connect(self._mac) as connection:
-            connection.write_handle(handle_history_control, cmd_history_read_success)
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_SUCCESS)
 
     @staticmethod
     def _cmd_history_address(addr):
@@ -268,7 +268,7 @@ class MiFloraPoller(object):
         """
         start = time.time()
         with self._bt_interface.connect(self._mac) as connection:
-            response = connection.read_handle(handle_device_time)
+            response = connection.read_handle(_HANDLE_DEVICE_TIME)
         _LOGGER.debug("device time raw: %s", response)
         wall_time = (time.time() + start) / 2
         device_time = int.from_bytes(response, BYTEORDER)
@@ -295,17 +295,19 @@ class HistoryEntry(object):
     def _decode_history(self, byte_array):
         """Perform byte magic when decoding history data."""
         # negative numbers are stored in one's complement
+        # pylint: disable=trailing-comma-tuple
+
         temp_bytes = byte_array[4:6]
         if temp_bytes[1] & 0x80 > 0:
             temp_bytes = [temp_bytes[0] ^ 0xFF, temp_bytes[1] ^ 0xFF]
 
-        self.device_time, = int.from_bytes(byte_array[:4], BYTEORDER),
-        self.temperature, = int.from_bytes(temp_bytes, BYTEORDER) / 10.0,
-        self.light, = int.from_bytes(byte_array[7:10], BYTEORDER),
-        self.moisture, = byte_array[11],
+        (self.device_time,) = int.from_bytes(byte_array[:4], BYTEORDER),
+        (self.temperature,) = int.from_bytes(temp_bytes, BYTEORDER) / 10.0,
+        (self.light,) = int.from_bytes(byte_array[7:10], BYTEORDER),
+        (self.moisture,) = byte_array[11],
         self.conductivity = int.from_bytes(byte_array[12:14], BYTEORDER)
 
-        _LOGGER.debug('Raw data for char 0x3c: %s', MiFloraPoller._format_bytes(byte_array))
+        _LOGGER.debug('Raw data for char 0x3c: %s', MiFloraPoller.format_bytes(byte_array))
         _LOGGER.debug('device time: %d', self.device_time)
         _LOGGER.debug('temp: %f', self.temperature)
         _LOGGER.debug('brightness: %d', self.light)
