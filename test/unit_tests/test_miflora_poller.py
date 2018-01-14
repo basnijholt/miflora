@@ -16,7 +16,7 @@ class TestMifloraPoller(unittest.TestCase):
 
     def test_format_bytes(self):
         """Test conversion of bytes to string."""
-        self.assertEqual('AA BB 00', MiFloraPoller._format_bytes([0xAA, 0xBB, 0x00]))
+        self.assertEqual('AA BB 00', MiFloraPoller.format_bytes([0xAA, 0xBB, 0x00]))
 
     def test_read_battery(self):
         """Test reading the battery level."""
@@ -138,7 +138,7 @@ class TestMifloraPoller(unittest.TestCase):
     def test_get_history(self):
         """Test getting the history from the device.
 
-        The test data is copy-and-paste from a read sensor.
+        The test data is copy-and-paste from a real sensor.
         """
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
         backend = self._get_backend(poller)
@@ -148,11 +148,14 @@ class TestMifloraPoller(unittest.TestCase):
         backend.local_time = b'\xd8I\x15\x00'
         history = poller.fetch_history()
         self.assertEqual(2, len(history))
-        h0 = history[0]
-        self.assertAlmostEqual(h0[MI_TEMPERATURE], 19.3, 0.01)
-        self.assertEqual(h0[MI_MOISTURE], 30)
-        self.assertEqual(h0[MI_LIGHT], 0)
-        self.assertEqual(h0[MI_CONDUCTIVITY], 647)
+
+        entry = history[0]
+        self.assertAlmostEqual(entry.temperature, 19.3, 0.01)
+        self.assertEqual(entry.moisture, 30)
+        self.assertEqual(entry.light, 0)
+        self.assertEqual(entry.conductivity, 647)
+        self.assertEqual(entry.device_time, 1393200)
+        self.assertIsNotNone(entry.wall_time)
 
     @staticmethod
     def _get_backend(poller):

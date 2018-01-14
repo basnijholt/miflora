@@ -7,7 +7,7 @@ import logging
 import sys
 
 from miflora.miflora_poller import MiFloraPoller, \
-    MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY, MI_WALL_TIME
+    MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
 from miflora import miflora_scanner, available_backends, BluepyBackend, GatttoolBackend, PygattBackend
 
 
@@ -62,16 +62,17 @@ def list_backends(_):
 
 
 def history(args):
+    """Read the history from the sensor."""
     backend = _get_backend(args)
     print('Getting history from sensor...')
     poller = MiFloraPoller(args.mac, backend)
     history_list = poller.fetch_history()
-    for h in history_list:
-        print('History from {}'.format(h.wall_time))
-        print("    Temperature: {}".format(h.temperature))
-        print("    Moisture: {}".format(h.moisture))
-        print("    Light: {}".format(h.light))
-        print("    Conductivity: {}".format(h.conductivity))
+    for entry in history_list:
+        print('History from {}'.format(entry.wall_time))
+        print("    Temperature: {}".format(entry.temperature))
+        print("    Moisture: {}".format(entry.moisture))
+        print("    Light: {}".format(entry.light))
+        print("    Conductivity: {}".format(entry.conductivity))
 
 
 def main():
