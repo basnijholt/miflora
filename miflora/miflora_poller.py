@@ -20,9 +20,8 @@ MI_LIGHT = "light"
 MI_MOISTURE = "moisture"
 MI_CONDUCTIVITY = "conductivity"
 MI_BATTERY = "battery"
-MI_FIRMWARE = "firmware"
-MI_DEVICE_TIME = "device_time"
-MI_WALL_TIME = "wall_time"
+_MI_DEVICE_TIME = "device_time"
+_MI_WALL_TIME = "wall_time"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -241,7 +240,7 @@ class MiFloraPoller(object):
                     _LOGGER.info("Progress: %d of %d", i+1, history_length)
 
         _time = self._fetch_device_time()
-        time_diff = _time[MI_WALL_TIME] - _time[MI_DEVICE_TIME]
+        time_diff = _time[_MI_WALL_TIME] - _time[_MI_DEVICE_TIME]
         for entry in data:
             entry.compute_wall_time(time_diff)
 
@@ -275,8 +274,8 @@ class MiFloraPoller(object):
         _LOGGER.info('device time: %s local time: %s', device_time, wall_time)
 
         return {
-            MI_DEVICE_TIME: device_time,
-            MI_WALL_TIME: wall_time
+            _MI_DEVICE_TIME: device_time,
+            _MI_WALL_TIME: wall_time
         }
 
 
