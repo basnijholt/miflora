@@ -26,7 +26,8 @@ class BluepyBackend(AbstractBackend):
 
     def disconnect(self):
         """Disconnect from a device."""
-        self._peripheral.disconnect()
+        if self._peripheral is not None:
+            self._peripheral.disconnect()
         self._peripheral = None
 
     def read_handle(self, handle):

@@ -135,6 +135,25 @@ class TestMifloraPoller(unittest.TestCase):
         self.assertAlmostEqual(3.0, poller.parameter_value(MI_TEMPERATURE), delta=0.01)
         self.assertTrue(poller.cache_available())
 
+    def test_get_history(self):
+        """Test getting the history from the device.
+
+        The test data is copy-and-paste from a read sensor.
+        """
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        backend = self._get_backend(poller)
+        backend.history_info = b'\x02\x006E\xf2\x11\x08\x00\xe8\x15\x08\x00\x00\x00\x00\x00'
+        backend.history_data = [b'\x30\x42\x15\x00\xC1\x00\x00\x00\x00\x00\x00\x1E\x87\x02\x00\x00',
+                                b'\x20\x34\x15\x00\xC1\x00\x00\x00\x00\x00\x00\x1E\x8C\x02\x00\x00']
+        backend.local_time = b'\xd8I\x15\x00'
+        history = poller.fetch_history()
+        self.assertEqual(2, len(history))
+        h0 = history[0]
+        self.assertAlmostEqual(h0[MI_TEMPERATURE], 19.3, 0.01)
+        self.assertEqual(h0[MI_MOISTURE], 30)
+        self.assertEqual(h0[MI_LIGHT], 0)
+        self.assertEqual(h0[MI_CONDUCTIVITY], 647)
+
     @staticmethod
     def _get_backend(poller):
         """Get the backend from a MiFloraPoller object."""
