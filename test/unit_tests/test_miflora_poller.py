@@ -156,6 +156,17 @@ class TestMifloraPoller(unittest.TestCase):
         with self.assertRaises(IOError):
             poller.name()
 
+    def test_no_answer_version(self):
+        """Sensor returns None for handle 0x03.
+
+        Check that this triggers the right exception.
+        """
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        backend = self._get_backend(poller)
+        backend.handle_0x38_raw = None
+        with self.assertRaises(IOError):
+            poller.name()
+
     @staticmethod
     def _get_backend(poller):
         """Get the backend from a MiFloraPoller object."""
