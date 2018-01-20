@@ -26,7 +26,8 @@ class MockBackend(AbstractBackend):
         self.expected_write_handles = set()
         self.override_read_handles = dict()
         self.is_available = True
-        self.handle_0x35_raw = None
+        self._handle_0x35_raw_set = False
+        self._handle_0x35_raw = None
 
     def check_backend(self):
         """This backend is available when the field is set accordingly."""
@@ -67,8 +68,8 @@ class MockBackend(AbstractBackend):
 
     def _read_sensor_data(self):
         """Recreate sensor data from the fields of this class."""
-        if self.handle_0x35_raw is not None:
-            return self.handle_0x35_raw
+        if self._handle_0x35_raw_set:
+            return self._handle_0x35_raw
         result = [0xFE]*16
         temp = int(self.temperature * 10)
         result[0] = int(temp % 256)
@@ -86,3 +87,12 @@ class MockBackend(AbstractBackend):
     def _read_name(self):
         """Convert the name into a byte array and return it."""
         return [ord(c) for c in self.name]
+
+    @property
+    def handle_0x35_raw(self):
+        return self._handle_0x35_raw
+
+    @handle_0x35_raw.setter
+    def handle_0x35_raw(self, value):
+        self._handle_0x35_raw_set = True
+        self._handle_0x35_raw = value
