@@ -94,18 +94,28 @@ class MockBackend(AbstractBackend):
 
     @property
     def handle_0x35_raw(self):
+        """Getter for handle_0x35_raw."""
         return self._handle_0x35_raw
 
     @handle_0x35_raw.setter
     def handle_0x35_raw(self, value):
+        """Setter for handle_0x35_raw.
+
+        This needs a separate flag so that we can also use "None" as return value.
+        """
         self._handle_0x35_raw_set = True
         self._handle_0x35_raw = value
 
     @property
     def handle_0x03_raw(self):
+        """Getter for handle_0x03_raw."""
         return self._handle_0x03_raw
 
     @handle_0x03_raw.setter
     def handle_0x03_raw(self, value):
+        """Setter for handle_0x33_raw.
+
+        This needs a separate flag so that we can also use "None" as return value.
+        """
         self._handle_0x03_raw_set = True
         self._handle_0x03_raw = value

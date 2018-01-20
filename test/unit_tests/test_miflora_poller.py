@@ -135,6 +135,10 @@ class TestMifloraPoller(unittest.TestCase):
         self.assertTrue(poller.cache_available())
 
     def test_no_answer_data(self):
+        """Sensor returns None for handle 0x35.
+
+        Check that this triggers the right exception.
+        """
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
         backend = self._get_backend(poller)
         backend.handle_0x35_raw = None
@@ -142,6 +146,10 @@ class TestMifloraPoller(unittest.TestCase):
             poller.parameter_value(MI_TEMPERATURE)
 
     def test_no_answer_name(self):
+        """Sensor returns None for handle 0x03.
+
+        Check that this triggers the right exception.
+        """
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
         backend = self._get_backend(poller)
         backend.handle_0x03_raw = None
