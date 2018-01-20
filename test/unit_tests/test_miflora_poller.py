@@ -110,7 +110,6 @@ class TestMifloraPoller(unittest.TestCase):
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
         backend = self._get_backend(poller)
         backend.handle_0x35_raw = bytes(b'\x53\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x02\x3C\x00\xFB\x34\x9B')
-        print(backend.handle_0x35_raw)
         self.assertAlmostEqual(-17.3, poller.parameter_value(MI_TEMPERATURE), delta=0.01)
 
     def test_clear_cache(self):
@@ -134,6 +133,13 @@ class TestMifloraPoller(unittest.TestCase):
         backend.temperature = 3.0
         self.assertAlmostEqual(3.0, poller.parameter_value(MI_TEMPERATURE), delta=0.01)
         self.assertTrue(poller.cache_available())
+
+    def test_no_answer(self):
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        backend = self._get_backend(poller)
+        backend.handle_0x35_raw = None
+        with self.assertRaises(IOError):
+            poller.parameter_value(MI_TEMPERATURE)
 
     @staticmethod
     def _get_backend(poller):

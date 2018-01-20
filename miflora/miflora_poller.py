@@ -189,4 +189,6 @@ class MiFloraPoller(object):
     @staticmethod
     def _format_bytes(raw_data):
         """Prettyprint a byte array."""
+        if raw_data is None:
+            return 'None'
         return ' '.join([format(c, "02x") for c in raw_data]).upper()
