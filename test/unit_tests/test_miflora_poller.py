@@ -1,10 +1,11 @@
 """Tests for the miflora_poller module."""
 import unittest
+from unittest import mock
 from test.helper import MockBackend
 from test import HANDLE_WRITE_MODE_CHANGE, HANDLE_READ_SENSOR_DATA, INVALID_DATA
 
 from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY
-
+from miflora.backends import BluetoothBackendException, AbstractBackend
 
 class TestMifloraPoller(unittest.TestCase):
     """Tests for the MiFloraPoller class."""
@@ -166,6 +167,12 @@ class TestMifloraPoller(unittest.TestCase):
         backend.handle_0x38_raw = None
         with self.assertRaises(IOError):
             poller.name()
+
+    @mock.patch('test.helper.MockBackend')
+    def test_connect_exception(self, mock_backend):
+        mock_backend.connect = mock.Mock(side_effect=BluetoothBackendException)
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        self.assertIsNone(poller.firmware_version())
 
     @staticmethod
     def _get_backend(poller):

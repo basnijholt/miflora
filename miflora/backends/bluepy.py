@@ -6,6 +6,17 @@ from miflora.backends import AbstractBackend, BluetoothBackendException
 _LOGGER = logging.getLogger(__name__)
 
 
+def wrap_exception(func):
+    from bluepy.btle import BTLEException
+
+    def func_wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except BTLEException as exception:
+            raise BluetoothBackendException(str(exception))
+    return func_wrapper
+
+
 class BluepyBackend(AbstractBackend):
     """Backend for Miflora using the bluepy library."""
 
@@ -14,6 +25,7 @@ class BluepyBackend(AbstractBackend):
         super(BluepyBackend, self).__init__(adapter)
         self._peripheral = None
 
+    @wrap_exception
     def connect(self, mac):
         """Connect to a device."""
         from bluepy.btle import Peripheral
@@ -24,11 +36,13 @@ class BluepyBackend(AbstractBackend):
         iface = int(match_result.group(1))
         self._peripheral = Peripheral(mac, iface=iface)
 
+    @wrap_exception
     def disconnect(self):
         """Disconnect from a device."""
         self._peripheral.disconnect()
         self._peripheral = None
 
+    @wrap_exception
     def read_handle(self, handle):
         """Read a handle from the device.
 
@@ -38,6 +52,7 @@ class BluepyBackend(AbstractBackend):
             raise BluetoothBackendException('not connected to backend')
         return self._peripheral.readCharacteristic(handle)
 
+    @wrap_exception
     def write_handle(self, handle, value):
         """Write a handle from the device.
 
@@ -58,6 +73,7 @@ class BluepyBackend(AbstractBackend):
         return False
 
     @staticmethod
+    @wrap_exception
     def scan_for_devices(timeout):
         """Scan for bluetooth low energy devices.
 

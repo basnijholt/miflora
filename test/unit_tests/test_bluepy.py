@@ -4,6 +4,8 @@ import unittest
 from unittest import mock
 from test import TEST_MAC
 from miflora.backends.bluepy import BluepyBackend
+from miflora.backends import BluetoothBackendException
+from bluepy.btle import BTLEException
 
 
 class TestBluepy(unittest.TestCase):
@@ -37,3 +39,10 @@ class TestBluepy(unittest.TestCase):
         self.assertTrue(BluepyBackend.check_backend())
 
     # find a way to test check_backend with an import error
+
+    @mock.patch('bluepy.btle.Peripheral', **{'side_effect': BTLEException(1,'text')})
+    def test_connect_exception(self, mock_peripheral):
+        backend = BluepyBackend()
+        with self.assertRaises(BluetoothBackendException):
+            backend.connect(TEST_MAC)
+
