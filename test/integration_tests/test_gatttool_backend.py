@@ -44,4 +44,4 @@ class TestGatttoolBackend(unittest.TestCase):
         """Test writing data to handle of the sensor."""
         with self.assertRaises(BluetoothBackendException):
             self.backend.connect(TEST_MAC)
-            self.backend.write_handle(HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE)
+            self.backend.read_handle(HANDLE_READ_NAME)
