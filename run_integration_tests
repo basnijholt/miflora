@@ -14,4 +14,5 @@ else
 fi
 sudo tox -e integration_tests -- --mac=$MAC $SUITE
 # clean up the file system permissions after running the tests as root
-sudo chown -R $UID .cache .tox
+sudo chown -R $UID .cache .tox .pytest_cache
+
