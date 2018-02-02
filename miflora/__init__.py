@@ -14,6 +14,7 @@ if sys.version_info <= (3, 4):
 from miflora.backends.bluepy import BluepyBackend  # noqa: E402 # pylint: disable=wrong-import-position
 from miflora.backends.gatttool import GatttoolBackend  # noqa: E402 # pylint: disable=wrong-import-position
 from miflora.backends.pygatt import PygattBackend  # noqa: E402 # pylint: disable=wrong-import-position
+from miflora.backends import BluetoothBackendException # noqa: E402 # pylint: disable=wrong-import-position
 _ALL_BACKENDS = [BluepyBackend, GatttoolBackend, PygattBackend]
 
 

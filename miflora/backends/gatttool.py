@@ -16,6 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def wrap_exception(func):
+    """Wrap all IOErrors to BluetoothBackendException"""
 
     def func_wrapper(*args, **kwargs):
         try:

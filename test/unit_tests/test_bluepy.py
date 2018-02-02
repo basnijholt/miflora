@@ -31,7 +31,7 @@ class TestBluepy(unittest.TestCase):
     def test_configuration_invalid(self, _):
         """Test adapter name pattern parsing."""
         backend = BluepyBackend(adapter='somestring')
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BluetoothBackendException):
             backend.connect(TEST_MAC)
 
     def test_check_backend_ok(self):
