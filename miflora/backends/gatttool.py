@@ -107,8 +107,7 @@ class GatttoolBackend(AbstractBackend):
                 time.sleep(delay)
                 delay *= 2
 
-        _LOGGER.debug("Exit write_ble, no data (%s)", current_thread())
-        return False
+        raise BluetoothBackendException("Exit write_ble, no data ({})".format(current_thread()))
 
     @wrap_exception
     def read_handle(self, handle):

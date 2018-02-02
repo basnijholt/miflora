@@ -43,8 +43,8 @@ class TestGatttool(unittest.TestCase):
         _configure_popenmock(popen_mock, '')
         backend = GatttoolBackend()
         backend.connect(TEST_MAC)
-        result = backend.read_handle(0xFF)
-        self.assertIsNone(result)
+        with self.assertRaises(BluetoothBackendException):
+            backend.read_handle(0xFF)
 
     @mock.patch('miflora.backends.gatttool.Popen')
     def test_read_handle_wrong_handle(self, popen_mock):
@@ -93,7 +93,8 @@ class TestGatttool(unittest.TestCase):
         _configure_popenmock(popen_mock, '')
         backend = GatttoolBackend()
         backend.connect(TEST_MAC)
-        self.assertFalse(backend.write_handle(0xFF, b'\x00\x10\xFF'))
+        with self.assertRaises(BluetoothBackendException):
+            backend.write_handle(0xFF, b'\x00\x10\xFF')
 
     @mock.patch('miflora.backends.gatttool.call', return_value=None)
     def test_check_backend_ok(self, call_mock):
