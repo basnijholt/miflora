@@ -19,7 +19,7 @@ def wrap_exception(func):
         try:
             return func(*args, **kwargs)
         except BTLEException as exception:
-            raise BluetoothBackendException(str(exception))
+            raise BluetoothBackendException() from exception
 
     return _func_wrapper
 

@@ -19,9 +19,9 @@ def wrap_exception(func):
         try:
             return func(*args, **kwargs)
         except BGAPIError as exception:
-            raise BluetoothBackendException(str(exception))
+            raise BluetoothBackendException() from exception
         except NotConnectedError as exception:
-            raise BluetoothBackendException(str(exception))
+            raise BluetoothBackendException() from exception
 
     return _func_wrapper
 
