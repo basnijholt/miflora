@@ -48,7 +48,7 @@ class MiFloraPoller(object):
     def name(self):
         """Return the name of the sensor."""
         with self._bt_interface.connect(self._mac) as connection:
-            name = connection.read_handle(_HANDLE_READ_NAME)
+            name = connection.read_handle(_HANDLE_READ_NAME)  # pylint: disable=no-member
 
         if not name:
             raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
@@ -67,12 +67,14 @@ class MiFloraPoller(object):
 
             if firmware_version >= "2.6.6":
                 # for the newer models a magic number must be written before we can read the current data
-                if not connection.write_handle(_HANDLE_WRITE_MODE_CHANGE, _DATA_MODE_CHANGE):
+                try:
+                    connection.write_handle(_HANDLE_WRITE_MODE_CHANGE, _DATA_MODE_CHANGE)   # pylint: disable=no-member
                     # If a sensor doesn't work, wait 5 minutes before retrying
+                except BluetoothBackendException:
                     self._last_read = datetime.now() - self._cache_timeout + \
                         timedelta(seconds=300)
                     return
-            self._cache = connection.read_handle(_HANDLE_READ_SENSOR_DATA)
+            self._cache = connection.read_handle(_HANDLE_READ_SENSOR_DATA)  # pylint: disable=no-member
             _LOGGER.debug('Received result for handle %s: %s',
                           _HANDLE_READ_SENSOR_DATA, self._format_bytes(self._cache))
             self._check_data()
@@ -98,7 +100,7 @@ class MiFloraPoller(object):
                 (datetime.now() - timedelta(hours=24) > self._fw_last_read):
             self._fw_last_read = datetime.now()
             with self._bt_interface.connect(self._mac) as connection:
-                res = connection.read_handle(_HANDLE_READ_VERSION_BATTERY)
+                res = connection.read_handle(_HANDLE_READ_VERSION_BATTERY)  # pylint: disable=no-member
                 _LOGGER.debug('Received result for handle %s: %s',
                               _HANDLE_READ_VERSION_BATTERY, self._format_bytes(res))
             if res is None:

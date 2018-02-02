@@ -23,7 +23,7 @@ class BluetoothInterface(object):
     @staticmethod
     def is_connected():
         """Check if we are connected to the sensor."""
-        return _BackendConnection.connected()
+        return _BackendConnection.is_connected()
 
 
 class _BackendConnection(object):  # pylint: disable=too-few-public-methods
@@ -52,8 +52,9 @@ class _BackendConnection(object):  # pylint: disable=too-few-public-methods
         self._lock.release()
 
     @staticmethod
-    def connected():
-        return _BackendConnection._lock.locked()
+    def is_connected():
+        """Check if the BackendConnection is connected."""
+        return _BackendConnection._lock.locked()  # pylint: disable=no-member
 
 
 class BluetoothBackendException(Exception):

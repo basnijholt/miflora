@@ -197,4 +197,4 @@ class TestMifloraPoller(unittest.TestCase):
     @staticmethod
     def _get_backend(poller):
         """Get the backend from a MiFloraPoller object."""
-        return poller._bt_interface.backend
+        return poller._bt_interface._backend
