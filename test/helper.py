@@ -1,7 +1,7 @@
 """Helper functions for unit tests."""
 from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY
 
-from miflora.backends import AbstractBackend
+from miflora.backends import AbstractBackend, BluetoothBackendException
 
 
 class MockBackend(AbstractBackend):
@@ -137,3 +137,44 @@ class MockBackend(AbstractBackend):
         """
         self._handle_0x38_raw_set = True
         self._handle_0x38_raw = value
+
+
+class ConnectExceptionBackend(AbstractBackend):
+    """This backend always raises Exceptions."""
+
+    def __init__(self, adapter):
+        super(ConnectExceptionBackend, self).__init__(adapter)
+
+    def connect(self, mac):
+        """Raise exception when connecting."""
+        raise BluetoothBackendException('always raising exceptions')
+
+    def disconnect(self):
+        """Disconnect always works"""
+
+    def check_backend(self):
+        """check backend must pass so that we get to the BT communication."""
+        return True
+
+
+class RWExceptionBackend(AbstractBackend):
+    """This backend always raises Exceptions."""
+
+    def __init__(self, adapter):
+        super(RWExceptionBackend, self).__init__(adapter)
+
+    def connect(self, mac):
+        """Connect always works"""
+
+    def disconnect(self):
+        """Disconnect always works"""
+
+    def check_backend(self):
+        """check backend must pass so that we get to the BT communication."""
+        return True
+
+    def read_handle(self, handle):
+        raise BluetoothBackendException('always raising')
+
+    def read_write(self, handle, value):
+        raise BluetoothBackendException('always raising')

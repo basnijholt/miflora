@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from struct import unpack
 import logging
 from threading import Lock
-from miflora.backends import BluetoothInterface
+from miflora.backends import BluetoothInterface, BluetoothBackendException
 
 _HANDLE_READ_VERSION_BATTERY = 0x38
 _HANDLE_READ_NAME = 0x03
@@ -51,7 +51,7 @@ class MiFloraPoller(object):
             name = connection.read_handle(_HANDLE_READ_NAME)
 
         if not name:
-            raise IOError("Could not read data from Mi Flora sensor %s" % self._mac)
+            raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
         return ''.join(chr(n) for n in name)
 
     def fill_cache(self):
@@ -135,7 +135,7 @@ class MiFloraPoller(object):
         if self.cache_available() and (len(self._cache) == 16):
             return self._parse_data()[parameter]
         else:
-            raise IOError("Could not read data from Mi Flora sensor %s" % self._mac)
+            raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
 
     def _check_data(self):
         """Ensure that the data in the cache is valid.

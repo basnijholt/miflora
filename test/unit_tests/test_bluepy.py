@@ -38,8 +38,6 @@ class TestBluepy(unittest.TestCase):
         """Test check_backend successfully."""
         self.assertTrue(BluepyBackend.check_backend())
 
-    # find a way to test check_backend with an import error
-
     @mock.patch('bluepy.btle.Peripheral', **{'side_effect': BTLEException(1, 'text')})
     def test_connect_exception(self, _):
         """Test exception wrapping."""
