@@ -29,6 +29,7 @@ def wrap_exception(func):
 class PygattBackend(AbstractBackend):
     """Bluetooth backend for Blue Giga based bluetooth devices."""
 
+    @wrap_exception
     def __init__(self, adapter=None):
         """Create a new instance.
 
