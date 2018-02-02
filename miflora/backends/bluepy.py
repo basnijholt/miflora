@@ -7,14 +7,21 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def wrap_exception(func):
-    from bluepy.btle import BTLEException
+    """Decorator to wrap BTLEExceptions into BluetoothBackendException."""
+    try:
+        # only do the wrapping in bluepy is installed.
+        # otherwise it's pointless anyway
+        from bluepy.btle import BTLEException
 
-    def func_wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except BTLEException as exception:
-            raise BluetoothBackendException(str(exception))
-    return func_wrapper
+        def func_wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except BTLEException as exception:
+                raise BluetoothBackendException(str(exception))
+
+        return func_wrapper
+    except ImportError:
+        return func
 
 
 class BluepyBackend(AbstractBackend):

@@ -17,6 +17,8 @@ matrix:
       env: TOXENV=flake8
     - python: "3.6"
       env: TOXENV=pylint
+    - python: "3.6"
+      env: TOXENV=noimport
 
 script: travis_wait tox
 after_success: coveralls
