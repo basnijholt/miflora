@@ -40,7 +40,11 @@ class _BackendConnection(object):  # pylint: disable=too-few-public-methods
 
     def __enter__(self):
         self._bt_interface.lock.acquire()
-        self._bt_interface.backend.connect(self.mac)
+        try:
+            self._bt_interface.backend.connect(self.mac)
+        except BluetoothBackendException:
+            self._bt_interface.lock.release()
+            raise
         return self._bt_interface.backend
 
     def __exit__(self, exc_type, exc_val, exc_tb):
