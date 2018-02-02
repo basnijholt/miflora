@@ -5,6 +5,7 @@ import pytest
 from miflora.backends import BluetoothBackendException
 from miflora.backends.gatttool import GatttoolBackend
 
+
 class TestGatttoolBackend(unittest.TestCase):
     """Test GatttoolBackend with real sensor."""
     # pylint does not understand pytest fixtures, so we have to disable the warning

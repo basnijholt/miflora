@@ -6,6 +6,7 @@ from test import HANDLE_WRITE_MODE_CHANGE, HANDLE_READ_SENSOR_DATA, INVALID_DATA
 from miflora import BluetoothBackendException
 from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY
 
+
 class TestMifloraPoller(unittest.TestCase):
     """Tests for the MiFloraPoller class."""
 
