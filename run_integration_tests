@@ -6,6 +6,12 @@
 #   called ".test_mac" so you can run the test with one call.
 
 MAC=`cat .test_mac` 
-sudo tox -e integration_tests -- --mac=$MAC
+
+if [ $# -eq 0 ]; then
+    SUITE=test/integration_tests
+else
+    SUITE=$1
+fi
+sudo tox -e integration_tests -- --mac=$MAC $SUITE
 # clean up the file system permissions after running the tests as root
 sudo chown -R $UID .cache .tox
