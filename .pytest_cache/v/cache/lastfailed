@@ -1,3 +1,26 @@
 {
-  "test/no_imports/test_noimports.py::TestNoImports::test_gatttool_check": true
+  "test/integration_tests/test_bluepy_backend.py::TestBluepyBackend::test_read": true,
+  "test/integration_tests/test_bluepy_backend.py::TestBluepyBackend::test_write": true,
+  "test/integration_tests/test_bluepy_backend.py::TestGatttoolBackend::test_invalid_mac_exception": true,
+  "test/integration_tests/test_bluepy_backend.py::TestGatttoolBackend::test_read": true,
+  "test/integration_tests/test_bluepy_backend.py::TestGatttoolBackend::test_write": true,
+  "test/integration_tests/test_demo.py::TestDemoPy::test_bluepy_poll": true,
+  "test/integration_tests/test_demo.py::TestDemoPy::test_gatttool_poll": true,
+  "test/integration_tests/test_demo.py::TestDemoPy::test_pygatt_poll": true,
+  "test/integration_tests/test_everything.py::TestEverythingBluepy::test_everything": true,
+  "test/integration_tests/test_everything.py::TestEverythingGatt::test_everything": true,
+  "test/integration_tests/test_gatttool_backend.py::TestGatttoolBackend::test_invalid_mac_exception": true,
+  "test/integration_tests/test_gatttool_backend.py::TestGatttoolBackend::test_read": true,
+  "test/integration_tests/test_gatttool_backend.py::TestGatttoolBackend::test_write": true,
+  "test/integration_tests/test_pygatt_backend.py::TestGatttoolBackend::test_invalid_mac_exception": true,
+  "test/integration_tests/test_pygatt_backend.py::TestGatttoolBackend::test_read": true,
+  "test/integration_tests/test_pygatt_backend.py::TestGatttoolBackend::test_write": true,
+  "test/integration_tests/test_pygatt_backend.py::TestPyGattBackend::test_check_backend": true,
+  "test/integration_tests/test_pygatt_backend.py::TestPyGattBackend::test_invalid_mac_exception": true,
+  "test/integration_tests/test_pygatt_backend.py::TestPyGattBackend::test_read": true,
+  "test/integration_tests/test_pygatt_backend.py::TestPyGattBackend::test_read_not_connected": true,
+  "test/integration_tests/test_pygatt_backend.py::TestPyGattBackend::test_write": true,
+  "test/no_imports/test_noimports.py::TestNoImports::test_bluepy_check": true,
+  "test/no_imports/test_noimports.py::TestNoImports::test_gatttool_check": true,
+  "test/no_imports/test_noimports.py::TestNoImports::test_pygatt_check": true
 }

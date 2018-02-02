@@ -12,16 +12,16 @@ def wrap_exception(func):
         # only do the wrapping in bluepy is installed.
         # otherwise it's pointless anyway
         from bluepy.btle import BTLEException
-
-        def _func_wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except BTLEException as exception:
-                raise BluetoothBackendException(str(exception))
-
-        return _func_wrapper
     except ImportError:
         return func
+
+    def _func_wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except BTLEException as exception:
+            raise BluetoothBackendException(str(exception))
+
+    return _func_wrapper
 
 
 class BluepyBackend(AbstractBackend):
