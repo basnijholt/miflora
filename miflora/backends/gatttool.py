@@ -163,8 +163,7 @@ class GatttoolBackend(AbstractBackend):
                 time.sleep(delay)
                 delay *= 2
 
-        _LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
-        return None
+        raise BluetoothBackendException("Exit read_ble, no data ({})".format(current_thread()))
 
     @staticmethod
     def check_backend():

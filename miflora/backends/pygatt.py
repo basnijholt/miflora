@@ -8,7 +8,7 @@ from miflora.backends import AbstractBackend, BluetoothBackendException
 def wrap_exception(func):
     """Decorator to wrap pygatt exceptions into BluetoothBackendException."""
     try:
-        # only do the wrapping in bluepy is installed.
+        # only do the wrapping if pygatt is installed.
         # otherwise it's pointless anyway
         from pygatt.backends.bgapi.exceptions import BGAPIError
         from pygatt.exceptions import NotConnectedError
