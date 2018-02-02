@@ -18,7 +18,7 @@ class TestDemoPy(unittest.TestCase):
 
     def setUp(self):
         """Wait some time before polling the same sensor with different backends."""
-        time.sleep(0.6)
+        #time.sleep(0.6)
 
     @pytest.mark.usefixtures("mac")
     def test_bluepy_poll(self):
