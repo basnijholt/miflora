@@ -7,11 +7,11 @@ class BluetoothInterface(object):
 
     This class takes care of locking and the context managers.
     """
+    lock = Lock()
 
     def __init__(self, backend, adapter='hci0', **kwargs):
         self.mac = None
         self.adapter = adapter
-        self.lock = Lock()
         self.backend = backend(self.adapter, **kwargs)
         self.backend.check_backend()
 
