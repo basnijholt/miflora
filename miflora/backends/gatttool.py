@@ -18,12 +18,12 @@ _LOGGER = logging.getLogger(__name__)
 def wrap_exception(func):
     """Wrap all IOErrors to BluetoothBackendException"""
 
-    def func_wrapper(*args, **kwargs):
+    def _func_wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except IOError as exception:
             raise BluetoothBackendException(str(exception))
-    return func_wrapper
+    return _func_wrapper
 
 
 class GatttoolBackend(AbstractBackend):

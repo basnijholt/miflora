@@ -3,9 +3,9 @@
 import unittest
 from unittest import mock
 from test import TEST_MAC
+from bluepy.btle import BTLEException
 from miflora.backends.bluepy import BluepyBackend
 from miflora.backends import BluetoothBackendException
-from bluepy.btle import BTLEException
 
 
 class TestBluepy(unittest.TestCase):
@@ -44,4 +44,3 @@ class TestBluepy(unittest.TestCase):
         backend = BluepyBackend()
         with self.assertRaises(BluetoothBackendException):
             backend.connect(TEST_MAC)
-

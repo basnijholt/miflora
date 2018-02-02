@@ -142,9 +142,6 @@ class MockBackend(AbstractBackend):
 class ConnectExceptionBackend(AbstractBackend):
     """This backend always raises Exceptions."""
 
-    def __init__(self, adapter):
-        super(ConnectExceptionBackend, self).__init__(adapter)
-
     def connect(self, mac):
         """Raise exception when connecting."""
         raise BluetoothBackendException('always raising exceptions')
@@ -160,9 +157,6 @@ class ConnectExceptionBackend(AbstractBackend):
 class RWExceptionBackend(AbstractBackend):
     """This backend always raises Exceptions."""
 
-    def __init__(self, adapter):
-        super(RWExceptionBackend, self).__init__(adapter)
-
     def connect(self, mac):
         """Connect always works"""
 
@@ -173,8 +167,10 @@ class RWExceptionBackend(AbstractBackend):
         """check backend must pass so that we get to the BT communication."""
         return True
 
-    def read_handle(self, handle):
+    def read_handle(self, _):
+        """Reading always fails."""
         raise BluetoothBackendException('always raising')
 
-    def read_write(self, handle, value):
+    def read_write(self, _, __):  # pylint: disable=no-self-use
+        """Writing always fails."""
         raise BluetoothBackendException('always raising')

@@ -13,13 +13,13 @@ def wrap_exception(func):
         # otherwise it's pointless anyway
         from bluepy.btle import BTLEException
 
-        def func_wrapper(*args, **kwargs):
+        def _func_wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
             except BTLEException as exception:
                 raise BluetoothBackendException(str(exception))
 
-        return func_wrapper
+        return _func_wrapper
     except ImportError:
         return func
 
@@ -38,8 +38,9 @@ class BluepyBackend(AbstractBackend):
         from bluepy.btle import Peripheral
         match_result = re.search(r'hci([\d]+)', self.adapter)
         if match_result is None:
-            raise BluetoothBackendException('Invalid pattern "{}" for BLuetooth adpater. '
-                             'Expetected something like "hci0".'.format(self.adapter))
+            raise BluetoothBackendException(
+                'Invalid pattern "{}" for BLuetooth adpater. '
+                'Expetected something like "hci0".'.format(self.adapter))
         iface = int(match_result.group(1))
         self._peripheral = Peripheral(mac, iface=iface)
 
