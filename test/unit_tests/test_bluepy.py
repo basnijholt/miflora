@@ -3,7 +3,9 @@
 import unittest
 from unittest import mock
 from test import TEST_MAC
+from bluepy.btle import BTLEException
 from miflora.backends.bluepy import BluepyBackend
+from miflora.backends import BluetoothBackendException
 
 
 class TestBluepy(unittest.TestCase):
@@ -29,11 +31,16 @@ class TestBluepy(unittest.TestCase):
     def test_configuration_invalid(self, _):
         """Test adapter name pattern parsing."""
         backend = BluepyBackend(adapter='somestring')
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BluetoothBackendException):
             backend.connect(TEST_MAC)
 
     def test_check_backend_ok(self):
         """Test check_backend successfully."""
         self.assertTrue(BluepyBackend.check_backend())
 
-    # find a way to test check_backend with an import error
+    @mock.patch('bluepy.btle.Peripheral', **{'side_effect': BTLEException(1, 'text')})
+    def test_connect_exception(self, _):
+        """Test exception wrapping."""
+        backend = BluepyBackend()
+        with self.assertRaises(BluetoothBackendException):
+            backend.connect(TEST_MAC)

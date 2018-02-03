@@ -10,9 +10,20 @@ import logging
 import re
 import time
 from subprocess import Popen, PIPE, TimeoutExpired, signal, call
-from miflora.backends import AbstractBackend
+from miflora.backends import AbstractBackend, BluetoothBackendException
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def wrap_exception(func):
+    """Wrap all IOErrors to BluetoothBackendException"""
+
+    def _func_wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except IOError as exception:
+            raise BluetoothBackendException() from exception
+    return _func_wrapper
 
 
 class GatttoolBackend(AbstractBackend):
@@ -43,6 +54,7 @@ class GatttoolBackend(AbstractBackend):
         """Check if we are connected to the backend."""
         return self._mac is not None
 
+    @wrap_exception
     def write_handle(self, handle, value):
         """Read from a BLE address.
 
@@ -53,7 +65,7 @@ class GatttoolBackend(AbstractBackend):
         """
 
         if not self.is_connected():
-            raise ValueError('Not connected to any device.')
+            raise BluetoothBackendException('Not connected to any device.')
 
         attempt = 0
         delay = 10
@@ -81,7 +93,7 @@ class GatttoolBackend(AbstractBackend):
 
             result = result.decode("utf-8").strip(' \n\t')
             if "Write Request failed" in result:
-                raise ValueError('Error writing handls to sensor: {}'.format(result))
+                raise BluetoothBackendException('Error writing handls to sensor: {}'.format(result))
             _LOGGER.debug("Got %s from gatttool", result)
             # Parse the output
             if "successfully" in result:
@@ -95,9 +107,9 @@ class GatttoolBackend(AbstractBackend):
                 time.sleep(delay)
                 delay *= 2
 
-        _LOGGER.debug("Exit write_ble, no data (%s)", current_thread())
-        return False
+        raise BluetoothBackendException("Exit write_ble, no data ({})".format(current_thread()))
 
+    @wrap_exception
     def read_handle(self, handle):
         """Read from a BLE address.
 
@@ -107,7 +119,7 @@ class GatttoolBackend(AbstractBackend):
         """
 
         if not self.is_connected():
-            raise ValueError('Not connected to any device.')
+            raise BluetoothBackendException('Not connected to any device.')
 
         attempt = 0
         delay = 10
@@ -136,7 +148,7 @@ class GatttoolBackend(AbstractBackend):
             _LOGGER.debug("Got \"%s\" from gatttool", result)
             # Parse the output
             if "read failed" in result:
-                raise ValueError("Read error from gatttool: {}".format(result))
+                raise BluetoothBackendException("Read error from gatttool: {}".format(result))
 
             res = re.search("( [0-9a-fA-F][0-9a-fA-F])+", result)
             if res:
@@ -150,8 +162,7 @@ class GatttoolBackend(AbstractBackend):
                 time.sleep(delay)
                 delay *= 2
 
-        _LOGGER.debug("Exit read_ble, no data (%s)", current_thread())
-        return None
+        raise BluetoothBackendException("Exit read_ble, no data ({})".format(current_thread()))
 
     @staticmethod
     def check_backend():

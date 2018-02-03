@@ -67,3 +67,4 @@ target/
 #PyCharm project files
 .idea/
 .test_mac
+.pytest_cache/

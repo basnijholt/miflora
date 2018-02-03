@@ -1,6 +1,6 @@
 """Test GatttoolBackend with real sensor."""
 import unittest
-from test import HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE
+from test import HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE, TEST_MAC
 import pytest
 from miflora.backends import BluetoothBackendException
 from miflora.backends.gatttool import GatttoolBackend
@@ -33,14 +33,15 @@ class TestGatttoolBackend(unittest.TestCase):
 
     def test_read_not_connected(self):
         """Test error handling if not connected."""
-        try:
+        with self.assertRaises(BluetoothBackendException):
             self.backend.read_handle(HANDLE_READ_NAME)
-            self.fail('should have thrown an exception')
-        except ValueError:
-            pass
-        except BluetoothBackendException:
-            pass
 
     def test_check_backend(self):
         """Test check_backend function."""
         self.assertTrue(self.backend.check_backend())
+
+    def test_invalid_mac_exception(self):
+        """Test writing data to handle of the sensor."""
+        with self.assertRaises(BluetoothBackendException):
+            self.backend.connect(TEST_MAC)
+            self.backend.read_handle(HANDLE_READ_NAME)

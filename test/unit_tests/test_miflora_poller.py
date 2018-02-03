@@ -1,8 +1,9 @@
 """Tests for the miflora_poller module."""
 import unittest
-from test.helper import MockBackend
+from test.helper import MockBackend, ConnectExceptionBackend, RWExceptionBackend
 from test import HANDLE_WRITE_MODE_CHANGE, HANDLE_READ_SENSOR_DATA, INVALID_DATA
 
+from miflora import BluetoothBackendException
 from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY
 
 
@@ -82,7 +83,8 @@ class TestMifloraPoller(unittest.TestCase):
         backend.set_version(2, 5, 0)
 
         backend.override_read_handles[HANDLE_READ_SENSOR_DATA] = INVALID_DATA
-        self.assertRaises(OSError, poller.parameter_value, MI_TEMPERATURE)
+        with self.assertRaises(BluetoothBackendException):
+            poller.parameter_value(MI_TEMPERATURE)
 
     def test_invalid_data_new(self):
         """Check if reading of the data fails, when invalid data is received.
@@ -95,7 +97,8 @@ class TestMifloraPoller(unittest.TestCase):
         backend.set_version(2, 7, 6)
 
         backend.override_read_handles[HANDLE_READ_SENSOR_DATA] = INVALID_DATA
-        self.assertRaises(OSError, poller.parameter_value, MI_TEMPERATURE)
+        with self.assertRaises(BluetoothBackendException):
+            poller.parameter_value(MI_TEMPERATURE)
 
     def test_name(self):
         """Check reading of the sensor name."""
@@ -142,7 +145,7 @@ class TestMifloraPoller(unittest.TestCase):
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
         backend = self._get_backend(poller)
         backend.handle_0x35_raw = None
-        with self.assertRaises(IOError):
+        with self.assertRaises(BluetoothBackendException):
             poller.parameter_value(MI_TEMPERATURE)
 
     def test_no_answer_name(self):
@@ -153,7 +156,7 @@ class TestMifloraPoller(unittest.TestCase):
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
         backend = self._get_backend(poller)
         backend.handle_0x03_raw = None
-        with self.assertRaises(IOError):
+        with self.assertRaises(BluetoothBackendException):
             poller.name()
 
     def test_no_answer_version(self):
@@ -164,10 +167,34 @@ class TestMifloraPoller(unittest.TestCase):
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
         backend = self._get_backend(poller)
         backend.handle_0x38_raw = None
-        with self.assertRaises(IOError):
+        with self.assertRaises(BluetoothBackendException):
             poller.name()
+
+    def test_connect_exception(self):
+        """Test reaction when getting a BluetoothBackendException."""
+        poller = MiFloraPoller(self.TEST_MAC, ConnectExceptionBackend, retries=0)
+        with self.assertRaises(BluetoothBackendException):
+            poller.firmware_version()
+        with self.assertRaises(BluetoothBackendException):
+            poller.name()
+        with self.assertRaises(BluetoothBackendException):
+            poller.parameter_value(MI_MOISTURE)
+        with self.assertRaises(BluetoothBackendException):
+            poller.parameter_value(MI_MOISTURE)
+
+    def test_rw_exception(self):
+        """Test reaction when getting a BluetoothBackendException."""
+        poller = MiFloraPoller(self.TEST_MAC, RWExceptionBackend, retries=0)
+        with self.assertRaises(BluetoothBackendException):
+            poller.firmware_version()
+        with self.assertRaises(BluetoothBackendException):
+            poller.name()
+        with self.assertRaises(BluetoothBackendException):
+            poller.parameter_value(MI_MOISTURE)
+        with self.assertRaises(BluetoothBackendException):
+            poller.parameter_value(MI_MOISTURE)
 
     @staticmethod
     def _get_backend(poller):
         """Get the backend from a MiFloraPoller object."""
-        return poller._bt_interface.backend
+        return poller._bt_interface._backend

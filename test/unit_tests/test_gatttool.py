@@ -3,7 +3,7 @@
 import unittest
 from unittest import mock
 from test import TEST_MAC
-from miflora.backends.gatttool import GatttoolBackend
+from miflora import GatttoolBackend, BluetoothBackendException
 
 
 class TestGatttool(unittest.TestCase):
@@ -43,8 +43,8 @@ class TestGatttool(unittest.TestCase):
         _configure_popenmock(popen_mock, '')
         backend = GatttoolBackend()
         backend.connect(TEST_MAC)
-        result = backend.read_handle(0xFF)
-        self.assertIsNone(result)
+        with self.assertRaises(BluetoothBackendException):
+            backend.read_handle(0xFF)
 
     @mock.patch('miflora.backends.gatttool.Popen')
     def test_read_handle_wrong_handle(self, popen_mock):
@@ -52,19 +52,19 @@ class TestGatttool(unittest.TestCase):
         _configure_popenmock(popen_mock, 'Characteristic value/descriptor read failed: Invalid handle')
         backend = GatttoolBackend()
         backend.connect(TEST_MAC)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BluetoothBackendException):
             backend.read_handle(0xFF)
 
     def test_read_not_connected(self):
         """Test reading data when not connected."""
         backend = GatttoolBackend()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BluetoothBackendException):
             backend.read_handle(0xFF)
 
     def test_write_not_connected(self):
         """Test writing data when not connected."""
         backend = GatttoolBackend()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BluetoothBackendException):
             backend.write_handle(0xFF, [0x00])
 
     @mock.patch('miflora.backends.gatttool.Popen')
@@ -83,7 +83,7 @@ class TestGatttool(unittest.TestCase):
         _configure_popenmock(popen_mock, "Characteristic Write Request failed: Attribute can't be written")
         backend = GatttoolBackend()
         backend.connect(TEST_MAC)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(BluetoothBackendException):
             backend.write_handle(0xFF, b'\x00\x10\xFF')
 
     @mock.patch('miflora.backends.gatttool.Popen')
@@ -93,7 +93,8 @@ class TestGatttool(unittest.TestCase):
         _configure_popenmock(popen_mock, '')
         backend = GatttoolBackend()
         backend.connect(TEST_MAC)
-        self.assertFalse(backend.write_handle(0xFF, b'\x00\x10\xFF'))
+        with self.assertRaises(BluetoothBackendException):
+            backend.write_handle(0xFF, b'\x00\x10\xFF')
 
     @mock.patch('miflora.backends.gatttool.call', return_value=None)
     def test_check_backend_ok(self, call_mock):
