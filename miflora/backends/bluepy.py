@@ -1,9 +1,12 @@
 """Backend for Miflora using the bluepy library."""
 import re
 import logging
+import time
 from miflora.backends import AbstractBackend, BluetoothBackendException
 
 _LOGGER = logging.getLogger(__name__)
+RETRY_LIMIT = 3
+RETRY_DELAY = 0.1
 
 
 def wrap_exception(func):
@@ -16,10 +19,16 @@ def wrap_exception(func):
         return func
 
     def _func_wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except BTLEException as exception:
-            raise BluetoothBackendException() from exception
+        error_count = 0
+        last_error = None
+        while error_count < RETRY_LIMIT:
+            try:
+                return func(*args, **kwargs)
+            except BTLEException as exception:
+                error_count += 1
+                last_error = exception
+                time.sleep(RETRY_DELAY)
+        raise BluetoothBackendException() from last_error
 
     return _func_wrapper
 
