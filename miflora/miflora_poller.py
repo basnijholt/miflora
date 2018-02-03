@@ -57,14 +57,15 @@ class MiFloraPoller(object):
     def fill_cache(self):
         """Fill the cache with new data from the sensor."""
         _LOGGER.debug('Filling cache with new sensor data.')
-        firmware_version = self.firmware_version()
-        with self._bt_interface.connect(self._mac) as connection:
-            if not firmware_version:
-                # If a sensor doesn't work, wait 5 minutes before retrying
-                self._last_read = datetime.now() - self._cache_timeout + \
-                    timedelta(seconds=300)
-                return
+        try:
+            firmware_version = self.firmware_version()
+        except BluetoothBackendException:
+            # If a sensor doesn't work, wait 5 minutes before retrying
+            self._last_read = datetime.now() - self._cache_timeout + \
+                timedelta(seconds=300)
+            raise
 
+        with self._bt_interface.connect(self._mac) as connection:
             if firmware_version >= "2.6.6":
                 # for the newer models a magic number must be written before we can read the current data
                 try:
