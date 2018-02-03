@@ -28,6 +28,7 @@ def wrap_exception(func):
                 error_count += 1
                 last_error = exception
                 time.sleep(RETRY_DELAY)
+                _LOGGER.debug('Call to %s failed, try %d of %d', func, error_count, RETRY_LIMIT)
         raise BluetoothBackendException() from last_error
 
     return _func_wrapper
