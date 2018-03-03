@@ -122,8 +122,8 @@ class GatttoolBackend(AbstractBackend):
         @param: delegate - unused
         @param: timeout - ignored. the self.timeout is used
         """
-        return self.write_handle(handle, _DATA_MODE_LISTEN, true)
-        
+        return self.write_handle(handle, self._DATA_MODE_LISTEN, True)
+
 
     @wrap_exception
     def read_handle(self, handle):

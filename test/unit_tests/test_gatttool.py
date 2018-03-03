@@ -78,6 +78,15 @@ class TestGatttool(unittest.TestCase):
 
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
+    def wait_for_notification(self, time_mock, popen_mock):
+        """Test writing to a handle successfully."""
+        _configure_popenmock(popen_mock, 'Characteristic value was written successfully')
+        backend = GatttoolBackend()
+        backend.connect(TEST_MAC)
+        self.assertTrue(backend.wait_for_notification(0xFF, None, 10))
+
+    @mock.patch('miflora.backends.gatttool.Popen')
+    @mock.patch('time.sleep', return_value=None)
     def test_write_handle_wrong_handle(self, time_mock, popen_mock):
         """Test writing to a non-writable handle."""
         _configure_popenmock(popen_mock, "Characteristic Write Request failed: Attribute can't be written")
