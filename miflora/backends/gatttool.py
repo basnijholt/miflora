@@ -124,7 +124,6 @@ class GatttoolBackend(AbstractBackend):
         """
         return self.write_handle(handle, self._DATA_MODE_LISTEN, True)
 
-
     @wrap_exception
     def read_handle(self, handle):
         """Read from a BLE address.

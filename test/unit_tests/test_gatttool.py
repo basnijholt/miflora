@@ -78,7 +78,7 @@ class TestGatttool(unittest.TestCase):
 
     @mock.patch('miflora.backends.gatttool.Popen')
     @mock.patch('time.sleep', return_value=None)
-    def wait_for_notification(self, time_mock, popen_mock):
+    def test_wait_for_notification(self, time_mock, popen_mock):
         """Test writing to a handle successfully."""
         _configure_popenmock(popen_mock, 'Characteristic value was written successfully')
         backend = GatttoolBackend()

@@ -7,6 +7,7 @@ _HANDLE_READ_FIRMWARE_VERSION = 0x0024
 _HANDLE_READ_NAME = 0x03
 _HANDLE_READ_WRITE_SENSOR_DATA = 0x0010
 
+
 class MiTempMockBackend(AbstractBackend):
     """Mockup of a Backend and Sensor.
 
