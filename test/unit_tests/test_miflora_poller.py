@@ -115,6 +115,13 @@ class TestMifloraPoller(unittest.TestCase):
         backend.handle_0x35_raw = bytes(b'\x53\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x02\x3C\x00\xFB\x34\x9B')
         self.assertAlmostEqual(-17.3, poller.parameter_value(MI_TEMPERATURE), delta=0.01)
 
+    def test_hight_brightness(self):
+        """Test with negative temperature."""
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        backend = self._get_backend(poller)
+        backend.handle_0x35_raw = bytes(b'\xBB\x00\x00\xFF\xFF\x00\x00\x20\x0D\x03\x00\x00\x00\x00\x00\x00')
+        self.assertEqual(65535, poller.parameter_value(MI_LIGHT))
+
     def test_clear_cache(self):
         """Test with negative temperature."""
         poller = MiFloraPoller(self.TEST_MAC, MockBackend)
