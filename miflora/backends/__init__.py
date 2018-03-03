@@ -70,6 +70,8 @@ class AbstractBackend(object):
     This class will be overridden by the different backends used by miflora.
     """
 
+    _DATA_MODE_LISTEN = bytes([0x01, 0x00])
+
     def __init__(self, adapter):
         self.adapter = adapter
 
@@ -89,6 +91,12 @@ class AbstractBackend(object):
         """Write a value to a handle.
 
         You must be connected to a device first."""
+        raise NotImplementedError
+
+    def wait_for_notification(self, handle, delegate, timeout):
+        """ registers as a listener and calls the delegate's handleNotification
+            for each notification received
+        """
         raise NotImplementedError
 
     def read_handle(self, handle):

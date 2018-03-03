@@ -80,6 +80,14 @@ class BluepyBackend(AbstractBackend):
             raise BluetoothBackendException('not connected to backend')
         return self._peripheral.writeCharacteristic(handle, value, True)
 
+    @wrap_exception
+    def wait_for_notification(self, handle, delegate, timeout):
+        if self._peripheral is None:
+            raise BluetoothBackendException('not connected to backend')
+        self.write_handle(handle, self._DATA_MODE_LISTEN)
+        self._peripheral.withDelegate(delegate)
+        return self._peripheral.waitForNotifications(timeout)
+
     @staticmethod
     def check_backend():
         """Check if the backend is available."""
