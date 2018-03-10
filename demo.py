@@ -6,9 +6,11 @@ import re
 import logging
 import sys
 
+from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
+
 from miflora.miflora_poller import MiFloraPoller, \
     MI_CONDUCTIVITY, MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY
-from miflora import miflora_scanner, available_backends, BluepyBackend, GatttoolBackend, PygattBackend
+from miflora import miflora_scanner
 
 
 def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from struct import unpack
 import logging
 from threading import Lock
-from miflora.backends import BluetoothInterface, BluetoothBackendException
+from btlewrap.base import BluetoothInterface, BluetoothBackendException
 
 _HANDLE_READ_VERSION_BATTERY = 0x38
 _HANDLE_READ_NAME = 0x03

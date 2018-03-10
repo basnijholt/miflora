@@ -4,7 +4,7 @@ Just use a different backend.
 """
 from test.integration_tests.test_gatttool_backend import TestGatttoolBackend
 from test import TEST_MAC, HANDLE_READ_NAME
-from miflora.backends import bluepy, BluetoothBackendException
+from btlewrap import bluepy, BluetoothBackendException
 
 
 class TestBluepyBackend(TestGatttoolBackend):

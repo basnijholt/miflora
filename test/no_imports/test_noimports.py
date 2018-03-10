@@ -1,6 +1,6 @@
 """These tests check what happens if not of the bluetooth libraries are installed."""
 import unittest
-from miflora import BluepyBackend, PygattBackend
+from btlewrap import BluepyBackend, PygattBackend
 
 
 class TestNoImports(unittest.TestCase):

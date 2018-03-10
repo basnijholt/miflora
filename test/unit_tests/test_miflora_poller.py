@@ -3,7 +3,7 @@ import unittest
 from test.helper import MockBackend, ConnectExceptionBackend, RWExceptionBackend
 from test import HANDLE_WRITE_MODE_CHANGE, HANDLE_READ_SENSOR_DATA, INVALID_DATA
 
-from miflora import BluetoothBackendException
+from btlewrap.base import BluetoothBackendException
 from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY
 
 

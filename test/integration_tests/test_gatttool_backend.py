@@ -2,8 +2,7 @@
 import unittest
 from test import HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE, TEST_MAC
 import pytest
-from miflora.backends import BluetoothBackendException
-from miflora.backends.gatttool import GatttoolBackend
+from btlewrap import BluetoothBackendException, GatttoolBackend
 
 
 class TestGatttoolBackend(unittest.TestCase):

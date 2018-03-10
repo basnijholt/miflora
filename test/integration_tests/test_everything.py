@@ -1,10 +1,10 @@
 """End to End test cases for MiFlora."""
 import unittest
 import pytest
+from btlewrap.gatttool import GatttoolBackend
+from btlewrap.bluepy import BluepyBackend
 from miflora.miflora_poller import (MiFloraPoller, MI_CONDUCTIVITY,
                                     MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY)
-from miflora.backends.gatttool import GatttoolBackend
-from miflora.backends.bluepy import BluepyBackend
 
 
 class TestEverythingGatt(unittest.TestCase):
