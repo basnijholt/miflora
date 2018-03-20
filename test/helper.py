@@ -83,6 +83,8 @@ class MockBackend(AbstractBackend):
 
         result[3] = int(self.brightness % 256)
         result[4] = int(self.brightness >> 8)
+        result[5] = 0
+        result[6] = 0
 
         result[7] = int(self.moisture)
 
