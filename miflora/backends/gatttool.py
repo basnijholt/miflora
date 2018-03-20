@@ -55,7 +55,7 @@ class GatttoolBackend(AbstractBackend):
         return self._mac is not None
 
     @wrap_exception
-    def write_handle(self, handle, value):
+    def write_handle(self, handle, value, listen=False):
         """Read from a BLE address.
 
         @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
@@ -74,6 +74,9 @@ class GatttoolBackend(AbstractBackend):
         while attempt <= self.retries:
             cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={}".format(
                 self._mac, self.byte_to_handle(handle), self.bytes_to_string(value), self.adapter)
+            if listen:
+                cmd = "gatttool --device={} --char-write-req -a {} -n {} --adapter={} --listen".format(
+                    self._mac, self.byte_to_handle(handle), self.bytes_to_string(value), self.adapter)
             _LOGGER.debug("Running gatttool with a timeout of %d: %s",
                           self.timeout, cmd)
 
@@ -108,6 +111,18 @@ class GatttoolBackend(AbstractBackend):
                 delay *= 2
 
         raise BluetoothBackendException("Exit write_ble, no data ({})".format(current_thread()))
+
+    @wrap_exception
+    def wait_for_notification(self, handle, delegate, timeout):
+        """Listen for characteristics changes from a BLE address.
+
+        @param: mac - MAC address in format XX:XX:XX:XX:XX:XX
+        @param: handle - BLE characteristics handle in format 0xXX
+                         a value of 0x0100 is written to register for listening
+        @param: delegate - unused
+        @param: timeout - ignored. the self.timeout is used
+        """
+        return self.write_handle(handle, self._DATA_MODE_LISTEN, True)
 
     @wrap_exception
     def read_handle(self, handle):
