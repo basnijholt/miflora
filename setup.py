@@ -21,5 +21,6 @@ setup(
     packages=find_packages(),
     keywords='plant sensor bluetooth low-energy ble',
     zip_safe=False,
+    install_requires=['btlewrap==0.0.1'],
     extras_require={'testing': ['pytest']}
 )

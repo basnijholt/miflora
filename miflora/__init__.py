@@ -9,15 +9,3 @@ if sys.version_info <= (3, 4):
                          sys.version_info.major,
                          sys.version_info.minor,
                          sys.executable))
-
-
-from miflora.backends.bluepy import BluepyBackend  # noqa: E402 # pylint: disable=wrong-import-position
-from miflora.backends.gatttool import GatttoolBackend  # noqa: E402 # pylint: disable=wrong-import-position
-from miflora.backends.pygatt import PygattBackend  # noqa: E402 # pylint: disable=wrong-import-position
-from miflora.backends import BluetoothBackendException  # noqa: F401 E402 # pylint: disable=wrong-import-position
-_ALL_BACKENDS = [BluepyBackend, GatttoolBackend, PygattBackend]
-
-
-def available_backends():
-    """Returns a list of all available backends."""
-    return [b for b in _ALL_BACKENDS if b.check_backend()]

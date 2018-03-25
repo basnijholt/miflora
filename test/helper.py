@@ -1,7 +1,7 @@
 """Helper functions for unit tests."""
 from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY
 
-from miflora.backends import AbstractBackend, BluetoothBackendException
+from btlewrap.base import AbstractBackend, BluetoothBackendException
 
 
 class MockBackend(AbstractBackend):
