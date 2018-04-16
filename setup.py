@@ -1,10 +1,12 @@
 """Python package description."""
+import os
 from setuptools import setup, find_packages
 
 
 def readme():
     """Load the readme file."""
-    with open('README.md') as readme_file:
+    readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
+    with open(readme_path) as readme_file:
         return readme_file.read()
 
 
