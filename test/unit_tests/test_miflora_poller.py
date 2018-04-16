@@ -1,6 +1,6 @@
 """Tests for the miflora_poller module."""
 import unittest
-from test.helper import MockBackend, ConnectExceptionBackend, RWExceptionBackend
+from test.helper import MockBackend, RWExceptionBackend, ConnectExceptionBackend
 from test import HANDLE_WRITE_MODE_CHANGE, HANDLE_READ_SENSOR_DATA, INVALID_DATA
 
 from btlewrap.base import BluetoothBackendException
@@ -200,6 +200,28 @@ class TestMifloraPoller(unittest.TestCase):
             poller.parameter_value(MI_MOISTURE)
         with self.assertRaises(BluetoothBackendException):
             poller.parameter_value(MI_MOISTURE)
+
+    def test_get_history(self):
+        """Test getting the history from the device.
+
+        The test data is copy-and-paste from a real sensor.
+        """
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        backend = self._get_backend(poller)
+        backend.history_info = b'\x02\x006E\xf2\x11\x08\x00\xe8\x15\x08\x00\x00\x00\x00\x00'
+        backend.history_data = [b'\x30\x42\x15\x00\xC1\x00\x00\x00\x00\x00\x00\x1E\x87\x02\x00\x00',
+                                b'\x20\x34\x15\x00\xC1\x00\x00\x00\x00\x00\x00\x1E\x8C\x02\x00\x00']
+        backend.local_time = b'\xd8I\x15\x00'
+        history = poller.fetch_history()
+        self.assertEqual(2, len(history))
+
+        entry = history[0]
+        self.assertAlmostEqual(entry.temperature, 19.3, 0.01)
+        self.assertEqual(entry.moisture, 30)
+        self.assertEqual(entry.light, 0)
+        self.assertEqual(entry.conductivity, 647)
+        self.assertEqual(entry.device_time, 1393200)
+        self.assertIsNotNone(entry.wall_time)
 
     @staticmethod
     def _get_backend(poller):
