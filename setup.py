@@ -1,16 +1,27 @@
 """Python package description."""
+import os
 from setuptools import setup, find_packages
+
+
+def readme():
+    """Load the readme file."""
+    readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
+    with open(readme_path, 'r') as readme_file:
+        return readme_file.read()
+
 
 setup(
     name='miflora',
-    version='0.3',
+    version='0.4',
     description='Library to read data from Mi Flora sensor',
+    long_description=readme(),
+    long_description_content_type='text/markdown',
     url='https://github.com/open-homeautomation/miflora',
     author='Daniel Matuschek',
     author_email='daniel@matuschek.net',
     license='MIT',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: System :: Hardware :: Hardware Drivers',
         'License :: OSI Approved :: MIT License',
@@ -21,6 +32,6 @@ setup(
     packages=find_packages(),
     keywords='plant sensor bluetooth low-energy ble',
     zip_safe=False,
-    install_requires=['btlewrap==0.0.1'],
+    install_requires=['btlewrap==0.0.2'],
     extras_require={'testing': ['pytest']}
 )
