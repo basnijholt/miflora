@@ -1,6 +1,7 @@
 sudo: false
 language: python
 install: pip install -U tox coveralls
+dist: xenial
 
 matrix:
   fast_finish: true
