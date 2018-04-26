@@ -38,7 +38,7 @@ binaray available on your machine.
 Example to use the bluez/gatttool wrapper:
 ```python
 from miflora.miflora_poller import MiFloraPoller
-from miflora.backends.gatttool import GatttoolBackend
+from btlewrap.gatttool import GatttoolBackend
 
 poller = MiFloraPoller('some mac address', GatttoolBackend)
 ```
