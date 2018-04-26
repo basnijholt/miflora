@@ -1,21 +1,16 @@
 """Python package description."""
-import os
 from setuptools import setup, find_packages
 
 
 def readme():
     """Load the readme file."""
-    readme_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md')
-    listing = os.listdir(os.path.dirname(readme_path))
-    if not os.path.exists(readme_path):
-        raise Exception('Could not find readme file in {}. Listing:\n{}'.format(readme_path, '\n'.join(sorted(listing))))
-    with open(readme_path, 'r') as readme_file:
+    with open('README.md', 'r') as readme_file:
         return readme_file.read()
 
 
 setup(
     name='miflora',
-    version='0.4',
+    version='0.4.1',
     description='Library to read data from Mi Flora sensor',
     long_description=readme(),
     long_description_content_type='text/markdown',
