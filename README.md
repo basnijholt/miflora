@@ -27,8 +27,24 @@ Xiaomi Mi Flora plant sensor.
 ## Backends
 As there is unfortunately no universally working Bluetooth Low Energy library for Python, the project currently 
 offers support for two Bluetooth implementations:
-* bluez tools (via a wrapper around gatttool)
+
 * bluepy library
+* bluez tools (via a wrapper around gatttool)
+* pygatt library
+
+
+### bluepy
+To use the [bluepy](https://github.com/IanHarvey/bluepy) library you have to install it on your machine, in most cases this can be done via: 
+```pip3 install bluepy``` 
+
+Example to use the bluepy backend:
+```python
+from miflora.miflora_poller import MiFloraPoller
+from btlewrap.bluepy import BluepyBackend
+
+poller = MiFloraPoller('some mac address', BluepyBackend)
+```
+This is the backend library to be used.
 
 ### bluez/gatttool wrapper
 To use the bluez wrapper, you need to install the bluez tools on your machine. No additional python 
@@ -43,17 +59,8 @@ from btlewrap.gatttool import GatttoolBackend
 poller = MiFloraPoller('some mac address', GatttoolBackend)
 ```
 
-### bluepy
-To use the [bluepy](https://github.com/IanHarvey/bluepy) library you have to install it on your machine, in most cases this can be done via: 
-```pip3 install bluepy``` 
-
-Example to use the bluepy backend:
-```python
-from miflora.miflora_poller import MiFloraPoller
-from miflora.backends.bluepy import BluepyBackend
-
-poller = MiFloraPoller('some mac address', BluepyBackend)
-```
+This backend should only be used, if your platform is not supported by bluepy. 
+Note: gatttool is depracated in many Linux distributions.
 
 ### pygatt
 If you have a Blue Giga based device that is supported by [pygatt](https://github.com/peplin/pygatt), you have to
@@ -63,15 +70,17 @@ install the bluepy library on your machine. In most cases this can be done via:
 Example to use the pygatt backend:
 ```python
 from miflora.miflora_poller import MiFloraPoller
-from miflora.backends.pygatt import PygattBackend
+from btlewrap.pygatt import PygattBackend
 
 poller = MiFloraPoller('some mac address', PygattBackend)
 ```
+# Dependencies
+miflora depends on the [btlewrap](https://github.com/ChristianKuehnel/btlewrap) library. If you install miflora via PIP btlewrap will automatically be installed. If not, you will have to install btlewrap manually:
+
+```pip3 install btlewrap``` 
 
 ## Conttributing
 please have a look at [CONTRIBUTING.md](CONTRIBUTING.md)
-
-----
 
 ## Projects Depending on `miflora`
 
