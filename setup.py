@@ -5,7 +5,10 @@ from setuptools import setup, find_packages
 
 def readme():
     """Load the readme file."""
-    readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
+    readme_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.md')
+    listing = os.listdir(os.path.dirname(readme_path))
+    if not os.path.exists(readme_path):
+        raise Exception('Could not find readme file in {}. Listing:\n{}'.format(readme_path, '\n'.join(sorted(listing))))
     with open(readme_path, 'r') as readme_file:
         return readme_file.read()
 
