@@ -87,4 +87,5 @@ please have a look at [CONTRIBUTING.md](CONTRIBUTING.md)
 The following shows a selected list of projects using this library:
 
 * https://github.com/ThomDietrich/miflora-mqtt-daemon - An MQTT Client/Daemon for Smart Home solution integration
-* https://home-assistant.io/components/sensor.miflora/ - Integration in Home Assistant 
+* https://home-assistant.io/components/sensor.miflora/ - Integration in Home Assistant
+* https://github.com/zewelor/bt-mqtt-gateway - A BT to MQTT gateway which support MiFlora sensors + other devices
