@@ -174,12 +174,11 @@ class MiFloraPoller(object):
         is beyond what is decoded in this method.
 
         semantics of the data (in little endian encoding):
-        bytes 0-1: temperature in 0.1 °C
-        byte 2: unknown
-        bytes 3-4: brightness in Lux
-        bytes 5-6: unknown
-        byte 7: conductivity in µS/cm
-        byte 8-9: brightness in Lux
+        bytes   0-1: temperature in 0.1 °C
+        byte      2: unknown
+        bytes   3-6: brightness in Lux
+        byte      7: moisture in %
+        byted   8-9: conductivity in µS/cm
         bytes 10-15: unknown
         """
         data = self._cache
