@@ -137,6 +137,11 @@ class MiFloraPoller(object):
 
         if self.cache_available() and (len(self._cache) == 16):
             return self._parse_data()[parameter]
+        if self.cache_available() and (len(self._cache) == 24):
+            if parameter == MI_LIGHT:
+                return False
+            else:
+                return self._parse_data()[parameter]
         else:
             raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
 
@@ -176,15 +181,19 @@ class MiFloraPoller(object):
         semantics of the data (in little endian encoding):
         bytes   0-1: temperature in 0.1 °C
         byte      2: unknown
-        bytes   3-6: brightness in Lux
+        bytes   3-6: brightness in Lux (MiFlora only)
         byte      7: moisture in %
         byted   8-9: conductivity in µS/cm
         bytes 10-15: unknown
         """
         data = self._cache
         res = dict()
-        temp, res[MI_LIGHT], res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
-            unpack('<hxIBhxxxxxx', data)
+        if len(data) == 24:
+            temp, res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
+                unpack('<hxxxxxBhxxxxxxxxxxxxxx', data)
+        else:
+            temp, res[MI_LIGHT], res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
+                unpack('<hxIBhxxxxxx', data)
         res[MI_TEMPERATURE] = temp/10.0
         return res
 
