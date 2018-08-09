@@ -173,6 +173,6 @@ class RWExceptionBackend(AbstractBackend):
         """Reading always fails."""
         raise BluetoothBackendException('always raising')
 
-    def read_write(self, _, __):  # pylint: disable=no-self-use
+    def read_write(self, *_):  # pylint: disable=no-self-use
         """Writing always fails."""
         raise BluetoothBackendException('always raising')
