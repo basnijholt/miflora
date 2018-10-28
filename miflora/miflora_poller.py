@@ -137,7 +137,7 @@ class MiFloraPoller(object):
 
         if self.cache_available() and (len(self._cache) == 16):
             return self._parse_data()[parameter]
-        if self.cache_available() and (len(self._cache) == 24):
+        if self.cache_available() and (self.is_ropot()):
             if parameter == MI_LIGHT:
                 return False
             else:
@@ -171,6 +171,10 @@ class MiFloraPoller(object):
     def cache_available(self):
         """Check if there is data in the cache."""
         return self._cache is not None
+    
+    def is_ropot(self):
+        """Check if the sensor is a ropot."""
+        return len(self._cache) == 24
 
     def _parse_data(self):
         """Parses the byte array returned by the sensor.
@@ -188,7 +192,7 @@ class MiFloraPoller(object):
         """
         data = self._cache
         res = dict()
-        if len(data) == 24:
+        if self.is_ropot():
             temp, res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
                 unpack('<hxxxxxBhxxxxxxxxxxxxxx', data)
         else:
