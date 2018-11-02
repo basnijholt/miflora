@@ -38,7 +38,7 @@ if args.devinfo == True:
             poller.firmware_version(),
             poller.parameter_value(MI_BATTERY)))
 else:
-    print('{{"timestamp":{0},"temperature":{1},"moisture":{2},"light":{3},"conductivity":{4}}}'
+    print('{{"timestamp":{0},"temperature":{{"value":{1},"units":"℃"}},"moisture":{{"value":{2},"units":"%"}},"light":{{"value":{3},"units":"Lv"}},"conductivity":{{"value":{4},"units":"Ohm"}}}}'
         .format(int(time.time()),
             poller.parameter_value(MI_TEMPERATURE),
             poller.parameter_value(MI_MOISTURE),
