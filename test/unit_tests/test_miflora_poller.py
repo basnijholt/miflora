@@ -121,6 +121,15 @@ class TestMifloraPoller(unittest.TestCase):
         backend = self._get_backend(poller)
         backend.handle_0x35_raw = bytes(b'\xBB\x00\x00\xFF\xFF\x00\x00\x20\x0D\x03\x00\x00\x00\x00\x00\x00')
         self.assertEqual(65535, poller.parameter_value(MI_LIGHT))
+    
+    def test_ropot(self):
+        """Test the ropot sensor."""
+        poller = MiFloraPoller(self.TEST_MAC, MockBackend)
+        backend = self._get_backend(poller)
+        backend.handle_0x35_raw = bytes(b'\xc8\x00\x00\x00\x00\x00\x00\x05\x1e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.assertAlmostEqual(20, poller.parameter_value(MI_TEMPERATURE), delta=0.01)
+        self.assertEqual(5, poller.parameter_value(MI_MOISTURE))
+        self.assertEqual(30, poller.parameter_value(MI_CONDUCTIVITY))
 
     def test_clear_cache(self):
         """Test with negative temperature."""
