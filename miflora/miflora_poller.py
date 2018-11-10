@@ -171,7 +171,7 @@ class MiFloraPoller(object):
     def cache_available(self):
         """Check if there is data in the cache."""
         return self._cache is not None
-    
+
     def is_ropot(self):
         """Check if the sensor is a ropot."""
         return len(self._cache) == 24
