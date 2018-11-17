@@ -40,7 +40,7 @@ if args.devinfo == True:
 else:
     print('{{"timestamp":{0},"temperature":{{"value":{1},"units":"℃"}},"moisture":{{"value":{2},"units":"%"}},"light":{{"value":{3},"units":"Lv"}},"conductivity":{{"value":{4},"units":"Ohm"}}}}'
         .format(int(time.time()),
-            poller.parameter_value(MI_TEMPERATURE),
-            poller.parameter_value(MI_MOISTURE),
-            poller.parameter_value(MI_LIGHT),
-            poller.parameter_value(MI_CONDUCTIVITY)))
+            float(poller.parameter_value(MI_TEMPERATURE)),
+            float(poller.parameter_value(MI_MOISTURE)),
+            float(poller.parameter_value(MI_LIGHT)),
+            float(poller.parameter_value(MI_CONDUCTIVITY))))
