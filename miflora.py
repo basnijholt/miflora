@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import argparse
 import re
 import time
@@ -38,9 +39,10 @@ if args.devinfo == True:
             poller.firmware_version(),
             poller.parameter_value(MI_BATTERY)))
 else:
-    print('{{"timestamp":{0},"temperature":{{"value":{1},"units":"℃"}},"moisture":{{"value":{2},"units":"%"}},"light":{{"value":{3},"units":"Lv"}},"conductivity":{{"value":{4},"units":"Ohm"}}}}'
+    sys.stdout.write(('{{"timestamp":{0},"temperature":{{"value":{1},"units":"℃"}},"moisture":{{"value":{2},"units":"%"}},"light":{{"value":{3},"units":"Lv"}},"conductivity":{{"value":{4},"units":"Ohm"}}}}'
         .format(int(time.time()),
             float(poller.parameter_value(MI_TEMPERATURE)),
             float(poller.parameter_value(MI_MOISTURE)),
             float(poller.parameter_value(MI_LIGHT)),
-            float(poller.parameter_value(MI_CONDUCTIVITY))))
+            float(poller.parameter_value(MI_CONDUCTIVITY)))))
+    sys.stdout.flush()
