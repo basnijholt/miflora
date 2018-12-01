@@ -16,7 +16,6 @@ def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-
         raise argparse.ArgumentTypeError('The MAC address "{}" seems to be in the wrong format'.format(mac))
     return mac
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('mac', type=valid_miflora_mac)
 parser.add_argument('-b', '--backend', choices=['gatttool', 'bluepy'], default='gatttool')
@@ -39,10 +38,10 @@ if args.devinfo == True:
             poller.firmware_version(),
             poller.parameter_value(MI_BATTERY)))
 else:
-    sys.stdout.write(('{{"timestamp":{0},"temperature":{{"value":{1},"units":"℃"}},"moisture":{{"value":{2},"units":"%"}},"light":{{"value":{3},"units":"Lv"}},"conductivity":{{"value":{4},"units":"Ohm"}}}}'
+    s = '{{"timestamp":{0},"temperature":{{"value":{1},"units":"℃"}},"moisture":{{"value":{2},"units":"%"}},"light":{{"value":{3},"units":"Lv"}},"conductivity":{{"value":{4},"units":"Ohm"}}}}' \
         .format(int(time.time()),
             float(poller.parameter_value(MI_TEMPERATURE)),
             float(poller.parameter_value(MI_MOISTURE)),
             float(poller.parameter_value(MI_LIGHT)),
-            float(poller.parameter_value(MI_CONDUCTIVITY)))))
-    sys.stdout.flush()
+            float(poller.parameter_value(MI_CONDUCTIVITY)))
+    print(s)
