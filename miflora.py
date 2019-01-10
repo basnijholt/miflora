@@ -38,8 +38,8 @@ if args.devinfo == True:
             poller.firmware_version(),
             poller.parameter_value(MI_BATTERY)))
 else:
-    s = '{{"timestamp":{0},"parameters":[{{"name":"temperature","value":{1},"units":"℃"}},{{"name":"moisture","value":{2},"units":"%"}},{{"name":"light","value":{3},"units":"Lv"}},{{"name":"conductivity","value":{4},"units":"Ohm"}}]}}' \
-        .format(int(time.time()),
+    s = '{{"parameters":[{{"name":"temperature","value":{},"units":"℃"}},{{"name":"moisture","value":{},"units":"%"}},{{"name":"light","value":{},"units":"Lv"}},{{"name":"conductivity","value":{},"units":"Ohm"}}]}}' \
+        .format(
             float(poller.parameter_value(MI_TEMPERATURE)),
             float(poller.parameter_value(MI_MOISTURE)),
             float(poller.parameter_value(MI_LIGHT)),
