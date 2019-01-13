@@ -33,15 +33,16 @@ else:
 poller = MiFloraPoller(args.mac, backend)
 
 if args.devinfo == True:
-    print('{{"name":"{0}","fw":"{1}","battery":{2}}}'
+    print('{{"name":"{}","fw":"{}","battery":{}}}'
         .format(poller.name(),
             poller.firmware_version(),
             poller.parameter_value(MI_BATTERY)))
 else:
-    s = '{{"parameters":[{{"name":"temperature","value":{},"units":"℃"}},{{"name":"moisture","value":{},"units":"%"}},{{"name":"light","value":{},"units":"Lv"}},{{"name":"conductivity","value":{},"units":"Ohm"}}]}}' \
+    # Xiaomi Mi Flower fertility units - see https://blog.tyang.org/2018/09/25/my-journey-to-a-smarter-home-part-2/
+    s = '{{"parameters":[{{"name":"temperature","value":{},"units":"℃"}},{{"name":"moisture","value":{},"units":"%"}},{{"name":"light","value":{},"units":"lux"}},{{"name":"fertility","value":{},"units":"us/cm"}}]}}' \
         .format(
-            float(poller.parameter_value(MI_TEMPERATURE)),
-            float(poller.parameter_value(MI_MOISTURE)),
-            float(poller.parameter_value(MI_LIGHT)),
-            float(poller.parameter_value(MI_CONDUCTIVITY)))
+            poller.parameter_value(MI_TEMPERATURE),
+            poller.parameter_value(MI_MOISTURE),
+            poller.parameter_value(MI_LIGHT),
+            poller.parameter_value(MI_CONDUCTIVITY))
     print(s)
