@@ -39,7 +39,7 @@ if args.devinfo == True:
             poller.parameter_value(MI_BATTERY)))
 else:
     # Xiaomi Mi Flower fertility units - see https://blog.tyang.org/2018/09/25/my-journey-to-a-smarter-home-part-2/
-    s = '{{"parameters":[{{"name":"temperature","value":{},"units":"℃"}},{{"name":"moisture","value":{},"units":"%"}},{{"name":"light","value":{},"units":"lux"}},{{"name":"fertility","value":{},"units":"us/cm"}}]}}' \
+    s = '{{"measurements":[{{"name":"temperature","value":{},"units":"℃"}},{{"name":"moisture","value":{},"units":"%"}},{{"name":"light","value":{},"units":"lux"}},{{"name":"fertility","value":{},"units":"us/cm"}}]}}' \
         .format(
             poller.parameter_value(MI_TEMPERATURE),
             poller.parameter_value(MI_MOISTURE),
