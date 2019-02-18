@@ -208,6 +208,7 @@ class MiFloraPoller(object):
 
     @staticmethod
     def _format_bytes(raw_data):
+        # TODO: turn this into a public function somewhere, maybe in __init__
         """Prettyprint a byte array."""
         if raw_data is None:
             return 'None'
@@ -220,8 +221,8 @@ class MiFloraPoller(object):
         """
         data = []
         with self._bt_interface.connect(self._mac) as connection:
-            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_INIT)
-            history_info = connection.read_handle(_HANDLE_HISTORY_READ)
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_INIT)  # pylint: disable=no-member
+            history_info = connection.read_handle(_HANDLE_HISTORY_READ)  # pylint: disable=no-member
             _LOGGER.debug('history info raw: %s', MiFloraPoller._format_bytes(history_info))
 
             history_length = int.from_bytes(history_info[0:2], BYTEORDER)
@@ -230,14 +231,15 @@ class MiFloraPoller(object):
                 for i in range(history_length):
                     payload = self._cmd_history_address(i)
                     try:
-                        connection.write_handle(_HANDLE_HISTORY_CONTROL, payload)
-                        response = connection.read_handle(_HANDLE_HISTORY_READ)
+                        connection.write_handle(_HANDLE_HISTORY_CONTROL, payload)  # pylint: disable=no-member
+                        response = connection.read_handle(_HANDLE_HISTORY_READ)  # pylint: disable=no-member
                         if response in _INVALID_HISTORY_DATA:
                             msg = 'Got invalid history data: {}'.format(response)
                             _LOGGER.error(msg)
                         else:
                             data.append(HistoryEntry(response))
-                    except Exception as exception:
+                    except Exception:
+                        # TODO: find more specific exception!
                         # when reading fails, we're probably at the end of the history
                         # even when the history_length might suggest something else
                         _LOGGER.error("Could only retrieve %d of %d entries from the history. "
@@ -260,7 +262,7 @@ class MiFloraPoller(object):
         Note: The data is deleted from the device. There is no way to recover it!
         """
         with self._bt_interface.connect(self._mac) as connection:
-            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_SUCCESS)
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_SUCCESS)  # pylint: disable=no-member
 
     @staticmethod
     def _cmd_history_address(addr):
@@ -274,7 +276,7 @@ class MiFloraPoller(object):
         """
         start = time.time()
         with self._bt_interface.connect(self._mac) as connection:
-            response = connection.read_handle(_HANDLE_DEVICE_TIME)
+            response = connection.read_handle(_HANDLE_DEVICE_TIME) # pylint: disable=no-member
         _LOGGER.debug("device time raw: %s", response)
         wall_time = (time.time() + start) / 2
         device_time = int.from_bytes(response, BYTEORDER)
@@ -283,7 +285,7 @@ class MiFloraPoller(object):
         return device_time, wall_time
 
 
-class HistoryEntry(object):
+class HistoryEntry(object):  # pylint: disable=too-few-public-methods
     """Entry in the history of the device."""
 
     def __init__(self, byte_array):
