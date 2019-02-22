@@ -10,7 +10,7 @@ def readme():
 
 setup(
     name='miflora',
-    version='0.4.1',
+    version='0.5',
     description='Library to read data from Mi Flora sensor',
     long_description=readme(),
     long_description_content_type='text/markdown',
