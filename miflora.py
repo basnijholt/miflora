@@ -13,11 +13,11 @@ from miflora.backends.bluepy import BluepyBackend
 
 def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
     if not pat.match(mac):
-        raise argparse.ArgumentTypeError('The MAC address "{}" seems to be in the wrong format'.format(mac))
+        raise argparse.ArgumentTypeError('The MAC address "{}" seems to be invalid'.format(mac))
     return mac
 
 parser = argparse.ArgumentParser()
-parser.add_argument('mac', type=valid_miflora_mac)
+parser.add_argument('macs', type=valid_miflora_mac, nargs="*")
 parser.add_argument('-b', '--backend', choices=['gatttool', 'bluepy'], default='gatttool')
 parser.add_argument('-d', '--devinfo', action='store_true')
 args = parser.parse_args()
@@ -30,19 +30,23 @@ elif args.backend == 'bluepy':
 else:
     raise Exception('unknown backend: {}'.format(args.backend))
 
-poller = MiFloraPoller(args.mac, backend)
+for mac in args.macs:
+    poller = MiFloraPoller(mac, backend)
 
-if args.devinfo == True:
-    print('{{"name":"{}","fw":"{}","battery":{}}}'
-        .format(poller.name(),
-            poller.firmware_version(),
-            poller.parameter_value(MI_BATTERY)))
-else:
-    # Xiaomi Mi Flower fertility units - see https://blog.tyang.org/2018/09/25/my-journey-to-a-smarter-home-part-2/
-    s = '{{"measurements":[{{"name":"temperature","value":{},"units":"℃"}},{{"name":"moisture","value":{},"units":"%"}},{{"name":"light","value":{},"units":"lux"}},{{"name":"fertility","value":{},"units":"us/cm"}}]}}' \
-        .format(
-            poller.parameter_value(MI_TEMPERATURE),
-            poller.parameter_value(MI_MOISTURE),
-            poller.parameter_value(MI_LIGHT),
-            poller.parameter_value(MI_CONDUCTIVITY))
-    print(s)
+    if args.devinfo == True:
+        print('{}->{{"name":"{}","fw":"{}","battery":{}}}'
+            .format(
+                mac,
+                poller.name(),
+                poller.firmware_version(),
+                poller.parameter_value(MI_BATTERY)))
+    else:
+        # For Xiaomi Mi Flower fertility units - see https://blog.tyang.org/2018/09/25/my-journey-to-a-smarter-home-part-2/
+        s = '{}->{{"measurements":[{{"name":"temperature","value":{},"units":"℃"}},{{"name":"moisture","value":{},"units":"%"}},{{"name":"light","value":{},"units":"lux"}},{{"name":"fertility","value":{},"units":"us/cm"}}]}}' \
+            .format(
+                mac,
+                poller.parameter_value(MI_TEMPERATURE),
+                poller.parameter_value(MI_MOISTURE),
+                poller.parameter_value(MI_LIGHT),
+                poller.parameter_value(MI_CONDUCTIVITY))
+        print(s)
