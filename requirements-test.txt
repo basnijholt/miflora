@@ -1,5 +1,5 @@
 pytest
 pytest-cov
 pytest-timeout
-pylint
+pylint==1.9.3
 flake8
