@@ -275,7 +275,7 @@ class MiFloraPoller(object):
         """
         start = time.time()
         with self._bt_interface.connect(self._mac) as connection:
-            response = connection.read_handle(_HANDLE_DEVICE_TIME) # pylint: disable=no-member
+            response = connection.read_handle(_HANDLE_DEVICE_TIME)  # pylint: disable=no-member
         _LOGGER.debug("device time raw: %s", response)
         wall_time = (time.time() + start) / 2
         device_time = int.from_bytes(response, BYTEORDER)
