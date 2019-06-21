@@ -29,7 +29,7 @@ As there is unfortunately no universally working Bluetooth Low Energy library fo
 offers support for two Bluetooth implementations:
 
 * bluepy library
-* bluez tools (via a wrapper around gatttool)
+* bluez tools (deprecated, via a wrapper around gatttool)
 * pygatt library
 
 
@@ -46,7 +46,9 @@ poller = MiFloraPoller('some mac address', BluepyBackend)
 ```
 This is the backend library to be used.
 
-### bluez/gatttool wrapper
+### bluez/gatttool wrapper (deprecated)
+:warning: The bluez team makred gatttool as deprecated. This solution may still work on some Linux distributions, but it is not recommended any more.
+
 To use the bluez wrapper, you need to install the bluez tools on your machine. No additional python 
 libraries are required. Some distrubutions moved the gatttool binary to a separate package. Make sure you have this 
 binaray available on your machine.
@@ -60,7 +62,6 @@ poller = MiFloraPoller('some mac address', GatttoolBackend)
 ```
 
 This backend should only be used, if your platform is not supported by bluepy. 
-Note: gatttool is depracated in many Linux distributions.
 
 ### pygatt
 If you have a Blue Giga based device that is supported by [pygatt](https://github.com/peplin/pygatt), you have to
