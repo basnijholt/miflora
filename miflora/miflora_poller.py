@@ -140,8 +140,7 @@ class MiFloraPoller(object):
         if self.cache_available() and (self.is_ropot()):
             if parameter == MI_LIGHT:
                 return False
-            else:
-                return self._parse_data()[parameter]
+            return self._parse_data()[parameter]
         else:
             raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
 
