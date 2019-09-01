@@ -40,6 +40,13 @@ _INVALID_HISTORY_DATA = [
 ]
 
 
+def format_bytes(raw_data):
+    """Prettyprint a byte array."""
+    if raw_data is None:
+        return 'None'
+    return ' '.join([format(c, "02x") for c in raw_data]).upper()
+
+
 class MiFloraPoller(object):
     """"
     A class to read data from Mi Flora plant sensors.
@@ -94,7 +101,7 @@ class MiFloraPoller(object):
                     return
             self._cache = connection.read_handle(_HANDLE_READ_SENSOR_DATA)  # pylint: disable=no-member
             _LOGGER.debug('Received result for handle %s: %s',
-                          _HANDLE_READ_SENSOR_DATA, self._format_bytes(self._cache))
+                          _HANDLE_READ_SENSOR_DATA, format_bytes(self._cache))
             self._check_data()
             if self.cache_available():
                 self._last_read = datetime.now()
@@ -120,7 +127,7 @@ class MiFloraPoller(object):
             with self._bt_interface.connect(self._mac) as connection:
                 res = connection.read_handle(_HANDLE_READ_VERSION_BATTERY)  # pylint: disable=no-member
                 _LOGGER.debug('Received result for handle %s: %s',
-                              _HANDLE_READ_VERSION_BATTERY, self._format_bytes(res))
+                              _HANDLE_READ_VERSION_BATTERY, format_bytes(res))
             if res is None:
                 self.battery = 0
                 self._firmware_version = None
@@ -205,14 +212,6 @@ class MiFloraPoller(object):
         res[MI_TEMPERATURE] = temp/10.0
         return res
 
-    @staticmethod
-    def _format_bytes(raw_data):
-        # TODO: turn this into a public function somewhere, maybe in __init__
-        """Prettyprint a byte array."""
-        if raw_data is None:
-            return 'None'
-        return ' '.join([format(c, "02x") for c in raw_data]).upper()
-
     def fetch_history(self):
         """Fetch the historical measurements from the sensor.
 
@@ -222,7 +221,7 @@ class MiFloraPoller(object):
         with self._bt_interface.connect(self._mac) as connection:
             connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_INIT)  # pylint: disable=no-member
             history_info = connection.read_handle(_HANDLE_HISTORY_READ)  # pylint: disable=no-member
-            _LOGGER.debug('history info raw: %s', MiFloraPoller._format_bytes(history_info))
+            _LOGGER.debug('history info raw: %s', format_bytes(history_info))
 
             history_length = int.from_bytes(history_info[0:2], BYTEORDER)
             _LOGGER.info("Getting %d measurements", history_length)
@@ -238,7 +237,6 @@ class MiFloraPoller(object):
                         else:
                             data.append(HistoryEntry(response))
                     except Exception:
-                        # TODO: find more specific exception!
                         # when reading fails, we're probably at the end of the history
                         # even when the history_length might suggest something else
                         _LOGGER.error("Could only retrieve %d of %d entries from the history. "
@@ -311,7 +309,7 @@ class HistoryEntry(object):  # pylint: disable=too-few-public-methods
         (self.moisture,) = byte_array[11],
         self.conductivity = int.from_bytes(byte_array[12:14], BYTEORDER)
 
-        _LOGGER.debug('Raw data for char 0x3c: %s', MiFloraPoller._format_bytes(byte_array))
+        _LOGGER.debug('Raw data for char 0x3c: %s', format_bytes(byte_array))
         _LOGGER.debug('device time: %d', self.device_time)
         _LOGGER.debug('temp: %f', self.temperature)
         _LOGGER.debug('brightness: %d', self.light)

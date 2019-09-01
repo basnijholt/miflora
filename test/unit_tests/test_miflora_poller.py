@@ -4,7 +4,8 @@ from test.helper import MockBackend, RWExceptionBackend, ConnectExceptionBackend
 from test import HANDLE_WRITE_MODE_CHANGE, HANDLE_READ_SENSOR_DATA, INVALID_DATA
 
 from btlewrap.base import BluetoothBackendException
-from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY
+from miflora.miflora_poller import MiFloraPoller, MI_LIGHT, MI_TEMPERATURE, MI_MOISTURE, MI_CONDUCTIVITY, MI_BATTERY, \
+    format_bytes
 
 
 class TestMifloraPoller(unittest.TestCase):
@@ -17,7 +18,7 @@ class TestMifloraPoller(unittest.TestCase):
 
     def test_format_bytes(self):
         """Test conversion of bytes to string."""
-        self.assertEqual('AA BB 00', MiFloraPoller._format_bytes([0xAA, 0xBB, 0x00]))
+        self.assertEqual('AA BB 00', format_bytes([0xAA, 0xBB, 0x00]))
 
     def test_read_battery(self):
         """Test reading the battery level."""
