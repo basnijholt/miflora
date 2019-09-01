@@ -15,7 +15,7 @@ class TestVersioncheck(unittest.TestCase):
         if sys.version_info >= self.MIN_SUPPORTED_VERSION:
             return
         try:
-            import miflora  # noqa: F401 # pylint: disable=unused-variable
+            import miflora  # noqa: F401 # pylint: disable=unused-import
             self.fail('Should have thrown an exception')
         except ValueError as val_err:
             self.assertIn('version', str(val_err))
@@ -24,4 +24,4 @@ class TestVersioncheck(unittest.TestCase):
         """Make sure newer python versions do not throw an exception."""
         if sys.version_info < self.MIN_SUPPORTED_VERSION:
             return
-        import miflora  # noqa: F401 # pylint: disable=unused-variable
+        import miflora  # noqa: F401 # pylint: disable=unused-import
