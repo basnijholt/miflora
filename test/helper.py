@@ -55,6 +55,9 @@ class MockBackend(AbstractBackend):
 
     def read_handle(self, handle):
         """Read one of the handles that are implemented."""
+        # this rule produces false positives in pylint 2.3.1, so disabling it
+        # pylint: disable=no-else-return
+
         if handle in self.override_read_handles:
             return self.override_read_handles[handle]
         elif handle == HANDLE_READ_VERSION_BATTERY:
@@ -67,8 +70,7 @@ class MockBackend(AbstractBackend):
             return self._read_history()
         elif handle == HANDLE_DEVICE_TIME:
             return self.local_time
-        else:
-            raise ValueError('handle not implemented in mockup')
+        raise ValueError('handle not implemented in mockup')
 
     def write_handle(self, handle, value):
         """Writing handles just stores the results in a list."""
@@ -156,6 +158,9 @@ class MockBackend(AbstractBackend):
 
     def _read_history(self):
         """Read the history data with the index set in previous HISTORY_CONTROL operation."""
+        # this rule produces false positives in pylint 2.3.1, so disabling it
+        # pylint: disable=no-else-return
+
         if self.history_data is None:
             raise ValueError('history not set')
         (cmd, index,) = unpack('<Bh', self._history_control)
@@ -163,8 +168,7 @@ class MockBackend(AbstractBackend):
             return self.history_info
         elif cmd == 0xA1:
             return self.history_data[index]
-        else:
-            raise ValueError('Unknown command {}'.format(cmd))
+        raise ValueError('Unknown command {}'.format(cmd))
 
 
 class ConnectExceptionBackend(AbstractBackend):

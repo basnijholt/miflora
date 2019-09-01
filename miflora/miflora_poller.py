@@ -47,7 +47,7 @@ def format_bytes(raw_data):
     return ' '.join([format(c, "02x") for c in raw_data]).upper()
 
 
-class MiFloraPoller(object):
+class MiFloraPoller:
     """"
     A class to read data from Mi Flora plant sensors.
     """
@@ -161,8 +161,7 @@ class MiFloraPoller(object):
 
         if self.cache_available() and (len(self._cache) == 16):
             return self._parse_data()[parameter]
-        else:
-            raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
+        raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
 
     def _check_data(self):
         """Ensure that the data in the cache is valid.
@@ -284,7 +283,7 @@ class MiFloraPoller(object):
         return device_time, wall_time
 
 
-class HistoryEntry(object):  # pylint: disable=too-few-public-methods
+class HistoryEntry:  # pylint: disable=too-few-public-methods
     """Entry in the history of the device."""
 
     def __init__(self, byte_array):

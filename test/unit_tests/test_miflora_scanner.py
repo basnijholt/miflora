@@ -10,7 +10,7 @@ class TestMifloraScanner(unittest.TestCase):
     def test_scan(self):
         """Test the scan function."""
 
-        class _MockBackend(object):  # pylint: disable=too-few-public-methods
+        class _MockBackend:  # pylint: disable=too-few-public-methods
             """Mock of the backend, always returning the same devices."""
 
             @staticmethod
