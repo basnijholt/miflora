@@ -63,6 +63,29 @@ def list_backends(_):
     print('\n'.join(backends))
 
 
+def history(args):
+    """Read the history from the sensor."""
+    backend = _get_backend(args)
+    print('Getting history from sensor...')
+    poller = MiFloraPoller(args.mac, backend)
+    history_list = poller.fetch_history()
+    print('History returned {} entries.'.format(len(history_list)))
+    for entry in history_list:
+        print('History from {}'.format(entry.wall_time))
+        print("    Temperature: {}".format(entry.temperature))
+        print("    Moisture: {}".format(entry.moisture))
+        print("    Light: {}".format(entry.light))
+        print("    Conductivity: {}".format(entry.conductivity))
+
+
+def clear_history(args):
+    """Clear the sensor history."""
+    backend = _get_backend(args)
+    print('Deleting sensor history data...')
+    poller = MiFloraPoller(args.mac, backend)
+    poller.clear_history()
+
+
 def main():
     """Main function.
 
@@ -82,6 +105,14 @@ def main():
 
     parser_scan = subparsers.add_parser('backends', help='list the available backends')
     parser_scan.set_defaults(func=list_backends)
+
+    parser_history = subparsers.add_parser('history', help='get device history')
+    parser_history.add_argument('mac', type=valid_miflora_mac)
+    parser_history.set_defaults(func=history)
+
+    parser_history = subparsers.add_parser('clear-history', help='clear device history')
+    parser_history.add_argument('mac', type=valid_miflora_mac)
+    parser_history.set_defaults(func=clear_history)
 
     args = parser.parse_args()
 

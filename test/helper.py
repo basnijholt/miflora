@@ -1,5 +1,8 @@
 """Helper functions for unit tests."""
-from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY
+from struct import unpack
+
+from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY, HANDLE_HISTORY_CONTROL, \
+    HANDLE_HISTORY_READ, HANDLE_DEVICE_TIME
 
 from btlewrap.base import AbstractBackend, BluetoothBackendException
 
@@ -32,6 +35,10 @@ class MockBackend(AbstractBackend):
         self._handle_0x03_raw = None
         self._handle_0x38_raw_set = False
         self._handle_0x38_raw = None
+        self.history_info = None
+        self.history_data = []
+        self.local_time = None
+        self._history_control = None
 
     def check_backend(self):
         """This backend is available when the field is set accordingly."""
@@ -48,6 +55,9 @@ class MockBackend(AbstractBackend):
 
     def read_handle(self, handle):
         """Read one of the handles that are implemented."""
+        # this rule produces false positives in pylint 2.3.1, so disabling it
+        # pylint: disable=no-else-return
+
         if handle in self.override_read_handles:
             return self.override_read_handles[handle]
         elif handle == HANDLE_READ_VERSION_BATTERY:
@@ -56,12 +66,18 @@ class MockBackend(AbstractBackend):
             return self._read_sensor_data()
         elif handle == HANDLE_READ_NAME:
             return self._read_name()
-        else:
-            raise ValueError('handle not implemented in mockup')
+        elif handle == HANDLE_HISTORY_READ:
+            return self._read_history()
+        elif handle == HANDLE_DEVICE_TIME:
+            return self.local_time
+        raise ValueError('handle not implemented in mockup')
 
     def write_handle(self, handle, value):
         """Writing handles just stores the results in a list."""
-        self.written_handles.append((handle, value))
+        if handle == HANDLE_HISTORY_CONTROL:
+            self._history_control = value
+        else:
+            self.written_handles.append((handle, value))
         return handle in self.expected_write_handles
 
     def _read_battery_version(self):
@@ -140,6 +156,20 @@ class MockBackend(AbstractBackend):
         self._handle_0x38_raw_set = True
         self._handle_0x38_raw = value
 
+    def _read_history(self):
+        """Read the history data with the index set in previous HISTORY_CONTROL operation."""
+        # this rule produces false positives in pylint 2.3.1, so disabling it
+        # pylint: disable=no-else-return
+
+        if self.history_data is None:
+            raise ValueError('history not set')
+        (cmd, index,) = unpack('<Bh', self._history_control)
+        if cmd == 0xA0:
+            return self.history_info
+        elif cmd == 0xA1:
+            return self.history_data[index]
+        raise ValueError('Unknown command {}'.format(cmd))
+
 
 class ConnectExceptionBackend(AbstractBackend):
     """This backend always raises Exceptions."""
@@ -173,6 +203,6 @@ class RWExceptionBackend(AbstractBackend):
         """Reading always fails."""
         raise BluetoothBackendException('always raising')
 
-    def read_write(self, _, __):  # pylint: disable=no-self-use
+    def read_write(self, *_):  # pylint: disable=no-self-use
         """Writing always fails."""
         raise BluetoothBackendException('always raising')
