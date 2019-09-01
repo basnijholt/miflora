@@ -161,6 +161,10 @@ class MiFloraPoller:
 
         if self.cache_available() and (len(self._cache) == 16):
             return self._parse_data()[parameter]
+        if self.cache_available() and (self.is_ropot()):
+            if parameter == MI_LIGHT:
+                return False
+            return self._parse_data()[parameter]
         raise BluetoothBackendException("Could not read data from Mi Flora sensor %s" % self._mac)
 
     def _check_data(self):
@@ -190,6 +194,10 @@ class MiFloraPoller:
         """Check if there is data in the cache."""
         return self._cache is not None
 
+    def is_ropot(self):
+        """Check if the sensor is a ropot."""
+        return len(self._cache) == 24
+
     def _parse_data(self):
         """Parses the byte array returned by the sensor.
 
@@ -199,15 +207,19 @@ class MiFloraPoller:
         semantics of the data (in little endian encoding):
         bytes   0-1: temperature in 0.1 °C
         byte      2: unknown
-        bytes   3-6: brightness in Lux
+        bytes   3-6: brightness in Lux (MiFlora only)
         byte      7: moisture in %
         byted   8-9: conductivity in µS/cm
         bytes 10-15: unknown
         """
         data = self._cache
         res = dict()
-        temp, res[MI_LIGHT], res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
-            unpack('<hxIBhxxxxxx', data)
+        if self.is_ropot():
+            temp, res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
+                unpack('<hxxxxxBhxxxxxxxxxxxxxx', data)
+        else:
+            temp, res[MI_LIGHT], res[MI_MOISTURE], res[MI_CONDUCTIVITY] = \
+                unpack('<hxIBhxxxxxx', data)
         res[MI_TEMPERATURE] = temp/10.0
         return res
 
