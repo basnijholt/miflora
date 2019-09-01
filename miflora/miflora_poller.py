@@ -259,6 +259,7 @@ class MiFloraPoller(object):
         Note: The data is deleted from the device. There is no way to recover it!
         """
         with self._bt_interface.connect(self._mac) as connection:
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_INIT)  # pylint: disable=no-member
             connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_SUCCESS)  # pylint: disable=no-member
 
     @staticmethod

@@ -69,6 +69,7 @@ def history(args):
     print('Getting history from sensor...')
     poller = MiFloraPoller(args.mac, backend)
     history_list = poller.fetch_history()
+    print('History returned {} entries.'.format(len(history_list)))
     for entry in history_list:
         print('History from {}'.format(entry.wall_time))
         print("    Temperature: {}".format(entry.temperature))
