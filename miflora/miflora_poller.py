@@ -236,7 +236,8 @@ class MiFloraPoller(object):
                             _LOGGER.error(msg)
                         else:
                             data.append(HistoryEntry(response))
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-except
+                        # TODO: find a more narrow exception here
                         # when reading fails, we're probably at the end of the history
                         # even when the history_length might suggest something else
                         _LOGGER.error("Could only retrieve %d of %d entries from the history. "
