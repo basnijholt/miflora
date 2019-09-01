@@ -69,5 +69,6 @@ target/
 .test_mac
 .pytest_cache/
 venv
-*.swp
 
+#vim swap files
+*.swp

@@ -3,6 +3,7 @@ Read data from Mi Flora plant sensor.
 """
 
 from datetime import datetime, timedelta
+import time
 from struct import unpack
 import logging
 from threading import Lock
@@ -21,6 +22,29 @@ MI_CONDUCTIVITY = "conductivity"
 MI_BATTERY = "battery"
 
 _LOGGER = logging.getLogger(__name__)
+
+BYTEORDER = 'little'
+
+_HANDLE_DEVICE_TIME = 0x41
+_HANDLE_HISTORY_CONTROL = 0x3e
+_HANDLE_HISTORY_READ = 0x3c
+
+_CMD_HISTORY_READ_INIT = b'\xa0\x00\x00'
+_CMD_HISTORY_READ_SUCCESS = b'\xa2\x00\x00'
+_CMD_HISTORY_READ_FAILED = b'\xa3\x00\x00'
+
+_INVALID_HISTORY_DATA = [
+    b'\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff',
+    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    b'\xaa\xbb\xcc\xdd\xee\xff\x99\x88\x77\x66\x55\x44\x33\x22\x11\x10',
+]
+
+
+def format_bytes(raw_data):
+    """Prettyprint a byte array."""
+    if raw_data is None:
+        return 'None'
+    return ' '.join([format(c, "02x") for c in raw_data]).upper()
 
 
 class MiFloraPoller(object):
@@ -77,7 +101,7 @@ class MiFloraPoller(object):
                     return
             self._cache = connection.read_handle(_HANDLE_READ_SENSOR_DATA)  # pylint: disable=no-member
             _LOGGER.debug('Received result for handle %s: %s',
-                          _HANDLE_READ_SENSOR_DATA, self._format_bytes(self._cache))
+                          _HANDLE_READ_SENSOR_DATA, format_bytes(self._cache))
             self._check_data()
             if self.cache_available():
                 self._last_read = datetime.now()
@@ -103,7 +127,7 @@ class MiFloraPoller(object):
             with self._bt_interface.connect(self._mac) as connection:
                 res = connection.read_handle(_HANDLE_READ_VERSION_BATTERY)  # pylint: disable=no-member
                 _LOGGER.debug('Received result for handle %s: %s',
-                              _HANDLE_READ_VERSION_BATTERY, self._format_bytes(res))
+                              _HANDLE_READ_VERSION_BATTERY, format_bytes(res))
             if res is None:
                 self.battery = 0
                 self._firmware_version = None
@@ -188,9 +212,112 @@ class MiFloraPoller(object):
         res[MI_TEMPERATURE] = temp/10.0
         return res
 
+    def fetch_history(self):
+        """Fetch the historical measurements from the sensor.
+
+        History is updated by the sensor every hour.
+        """
+        data = []
+        with self._bt_interface.connect(self._mac) as connection:
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_INIT)  # pylint: disable=no-member
+            history_info = connection.read_handle(_HANDLE_HISTORY_READ)  # pylint: disable=no-member
+            _LOGGER.debug('history info raw: %s', format_bytes(history_info))
+
+            history_length = int.from_bytes(history_info[0:2], BYTEORDER)
+            _LOGGER.info("Getting %d measurements", history_length)
+            if history_length > 0:
+                for i in range(history_length):
+                    payload = self._cmd_history_address(i)
+                    try:
+                        connection.write_handle(_HANDLE_HISTORY_CONTROL, payload)  # pylint: disable=no-member
+                        response = connection.read_handle(_HANDLE_HISTORY_READ)  # pylint: disable=no-member
+                        if response in _INVALID_HISTORY_DATA:
+                            msg = 'Got invalid history data: {}'.format(response)
+                            _LOGGER.error(msg)
+                        else:
+                            data.append(HistoryEntry(response))
+                    except Exception:  # pylint: disable=broad-except
+                        # find a more narrow exception here
+                        # when reading fails, we're probably at the end of the history
+                        # even when the history_length might suggest something else
+                        _LOGGER.error("Could only retrieve %d of %d entries from the history. "
+                                      "The rest is not readable", i, history_length)
+                        # connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_FAILED)
+                        break
+                    _LOGGER.info("Progress: reading entry %d of %d", i+1, history_length)
+
+        (device_time, wall_time) = self._fetch_device_time()
+        time_diff = wall_time - device_time
+        for entry in data:
+            entry.compute_wall_time(time_diff)
+
+        return data
+
+    def clear_history(self):
+        """Clear the device history.
+
+        On the next fetch_history, you will only get new data.
+        Note: The data is deleted from the device. There is no way to recover it!
+        """
+        with self._bt_interface.connect(self._mac) as connection:
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_INIT)  # pylint: disable=no-member
+            connection.write_handle(_HANDLE_HISTORY_CONTROL, _CMD_HISTORY_READ_SUCCESS)  # pylint: disable=no-member
+
     @staticmethod
-    def _format_bytes(raw_data):
-        """Prettyprint a byte array."""
-        if raw_data is None:
-            return 'None'
-        return ' '.join([format(c, "02x") for c in raw_data]).upper()
+    def _cmd_history_address(addr):
+        """Calculate this history address"""
+        return b'\xa1' + addr.to_bytes(2, BYTEORDER)
+
+    def _fetch_device_time(self):
+        """Fetch device time.
+
+        The device time is in seconds.
+        """
+        start = time.time()
+        with self._bt_interface.connect(self._mac) as connection:
+            response = connection.read_handle(_HANDLE_DEVICE_TIME)  # pylint: disable=no-member
+        _LOGGER.debug("device time raw: %s", response)
+        wall_time = (time.time() + start) / 2
+        device_time = int.from_bytes(response, BYTEORDER)
+        _LOGGER.info('device time: %s local time: %s', device_time, wall_time)
+
+        return device_time, wall_time
+
+
+class HistoryEntry(object):  # pylint: disable=too-few-public-methods
+    """Entry in the history of the device."""
+
+    def __init__(self, byte_array):
+        self.device_time = None
+        self.wall_time = None
+        self.temperature = None
+        self.light = None
+        self.moisture = None
+        self.conductivity = None
+        self._decode_history(byte_array)
+
+    def _decode_history(self, byte_array):
+        """Perform byte magic when decoding history data."""
+        # negative numbers are stored in one's complement
+        # pylint: disable=trailing-comma-tuple
+
+        temp_bytes = byte_array[4:6]
+        if temp_bytes[1] & 0x80 > 0:
+            temp_bytes = [temp_bytes[0] ^ 0xFF, temp_bytes[1] ^ 0xFF]
+
+        (self.device_time,) = int.from_bytes(byte_array[:4], BYTEORDER),
+        (self.temperature,) = int.from_bytes(temp_bytes, BYTEORDER) / 10.0,
+        (self.light,) = int.from_bytes(byte_array[7:10], BYTEORDER),
+        (self.moisture,) = byte_array[11],
+        self.conductivity = int.from_bytes(byte_array[12:14], BYTEORDER)
+
+        _LOGGER.debug('Raw data for char 0x3c: %s', format_bytes(byte_array))
+        _LOGGER.debug('device time: %d', self.device_time)
+        _LOGGER.debug('temp: %f', self.temperature)
+        _LOGGER.debug('brightness: %d', self.light)
+        _LOGGER.debug('conductivity: %d', self.conductivity)
+        _LOGGER.debug('moisture: %d', self.moisture)
+
+    def compute_wall_time(self, time_diff):
+        """Correct the device time to the wall time. """
+        self.wall_time = datetime.fromtimestamp(self.device_time + time_diff)
