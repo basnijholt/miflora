@@ -33,7 +33,7 @@ offers support for two Bluetooth implementations:
 * pygatt library
 
 
-### bluepy
+### bluepy (recommended)
 To use the [bluepy](https://github.com/IanHarvey/bluepy) library you have to install it on your machine, in most cases this can be done via: 
 ```pip3 install bluepy``` 
 
@@ -75,10 +75,34 @@ from btlewrap.pygatt import PygattBackend
 
 poller = MiFloraPoller('some mac address', PygattBackend)
 ```
-# Dependencies
+## Dependencies
 miflora depends on the [btlewrap](https://github.com/ChristianKuehnel/btlewrap) library. If you install miflora via PIP btlewrap will automatically be installed. If not, you will have to install btlewrap manually:
 
 ```pip3 install btlewrap``` 
+
+## Troubleshooting
+
+Users frequently have problems with the communication between their Bluetooth dongle and the sensors. Here are the usual things to try.
+
+### Battery empty
+While the battery usually lasts about a year indoor, it may also fail for unknown reasons before that. So the first thing to check if the battery is still good: take out the battery, wait 3 secs and put it back in. The light on the sensor should be flashing. If it is not: get a new battery.
+
+### Range
+The distance between Bluteooth dongle and sensor should be less than 5 meters. Try moving the sensor and dongle closer together and see if that solves the problem. If range is an issue, there are a few proxies/relays via MQTT available:
+* Linux
+  * [plantgateway](https://github.com/ChristianKuehnel/plantgateway)
+  * [miflora-mqtt-daemon](https://github.com/ThomDietrich/miflora-mqtt-daemon) 
+* ESP32
+  * [flora ](https://github.com/sidddy/flora)
+
+### Outside
+If you're operating your sensors outside, make sure the sensor is protected against rain. The power of the battery is decreasing blow -10°C. Sou you might not get readings at that temperature. Also make sure that you have a Bluetooth dongle close by.
+
+### Radio interference 
+The Bluetooth LE communication is not always reliable. There might be outages due to other radio interferences. The standard solution is to try again or poll your sensor more often that you really need it. It's also the hardest issue to analyse and debug.
+
+### Raspberry Pi
+If you're using a Rapsberry Pi, make sure, that you OS is up to date, including the latest kernel and firmware. There are sometimes useful Bluetooth fixes. Also make sure that you have a good power supply (3 A recommended) as this causes sporadic problems in many places.
 
 ## Conttributing
 please have a look at [CONTRIBUTING.md](CONTRIBUTING.md)
@@ -90,3 +114,5 @@ The following shows a selected list of projects using this library:
 * https://github.com/ThomDietrich/miflora-mqtt-daemon - An MQTT Client/Daemon for Smart Home solution integration
 * https://home-assistant.io/components/sensor.miflora/ - Integration in Home Assistant
 * https://github.com/zewelor/bt-mqtt-gateway - A BT to MQTT gateway which support MiFlora sensors + other devices
+* https://github.com/ChristianKuehnel/plantgateway - A MQTT Client to relay sensor data
+
