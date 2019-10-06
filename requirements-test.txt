@@ -3,3 +3,4 @@ pytest-cov
 pytest-timeout
 pylint==1.9.3
 flake8
+pexpect
