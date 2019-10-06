@@ -58,7 +58,7 @@ class MiFloraPoller:
         """
 
         self._mac = mac
-        self._bt_interface = BluetoothInterface(backend, adapter)
+        self._bt_interface = BluetoothInterface(backend)
         self._cache = None
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
