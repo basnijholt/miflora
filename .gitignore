@@ -66,6 +66,3 @@ target/
 
 #PyCharm project files
 .idea/
-
-# YO
-venv/
