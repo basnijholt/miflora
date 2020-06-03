@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Demo file showing how to use the miflora library."""
+"""Add non blocking poll demo"""
 
 import argparse
 import re
