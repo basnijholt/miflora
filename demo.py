@@ -13,7 +13,7 @@ from miflora.miflora_poller import MiFloraPoller, \
 from miflora import miflora_scanner
 
 
-def valid_miflora_mac(mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
+def valid_miflora_mac(mac, pat=re.compile(r"(80:EA:CA)|(C4:7C:8D):[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")):
     """Check for valid mac adresses."""
     if not pat.match(mac.upper()):
         raise argparse.ArgumentTypeError('The MAC address "{}" seems to be in the wrong format'.format(mac))
