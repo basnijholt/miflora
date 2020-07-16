@@ -27,11 +27,12 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     packages=find_packages(),
     keywords='plant sensor bluetooth low-energy ble',
     zip_safe=False,
-    install_requires=['btlewrap==0.0.9', 'typing>=3,<4'],
+    install_requires=['btlewrap==0.0.9'],
     extras_require={'testing': ['pytest']},
     include_package_data=True,
 )
