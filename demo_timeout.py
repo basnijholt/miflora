@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Demo file showing how to use the miflora library."""
+"""Add non blocking poll demo"""
 
 import argparse
 import re
 import logging
 import sys
+import multiprocessing
+import queue
 
 from btlewrap import available_backends, BluepyBackend, GatttoolBackend, PygattBackend
 
@@ -32,6 +35,24 @@ def poll(args):
     print("Light: {}".format(poller.parameter_value(MI_LIGHT)))
     print("Conductivity: {}".format(poller.parameter_value(MI_CONDUCTIVITY)))
     print("Battery: {}".format(poller.parameter_value(MI_BATTERY)))
+
+
+def process_poll(args, q):
+    q.put(poll(args))
+
+
+def process_timeout(args):
+    if args.timeout:
+        q = multiprocessing.Queue()
+        process = multiprocessing.Process(target=process_poll, args=(args, q))
+        process.start()
+        try:
+            res = q.get(True, float(args.timeout))
+        except queue.Empty:
+            print("Time out ({} s)".format(args.timeout))
+            process.terminate()
+    else:
+        poll(args)
 
 
 def scan(args):
@@ -94,11 +115,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--backend', choices=['gatttool', 'bluepy', 'pygatt'], default='gatttool')
     parser.add_argument('-v', '--verbose', action='store_const', const=True)
+    parser.add_argument('-t', '--timeout', help='timeout (seconds)')
     subparsers = parser.add_subparsers(help='sub-command help', )
 
     parser_poll = subparsers.add_parser('poll', help='poll data from a sensor')
     parser_poll.add_argument('mac', type=valid_miflora_mac)
-    parser_poll.set_defaults(func=poll)
+    parser_poll.set_defaults(func=process_timeout)
 
     parser_scan = subparsers.add_parser('scan', help='scan for devices')
     parser_scan.set_defaults(func=scan)
