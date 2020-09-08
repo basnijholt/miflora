@@ -10,7 +10,7 @@ def readme():
 
 setup(
     name="miflora",
-    version="0.5",
+    version="0.7dev",
     description="Library to read data from Mi Flora sensor",
     long_description=readme(),
     long_description_content_type="text/markdown",
@@ -18,13 +18,13 @@ setup(
     author="Daniel Matuschek",
     author_email="daniel@matuschek.net",
     license="MIT",
+    python_requires=">=3.6",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: System :: Hardware :: Hardware Drivers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
