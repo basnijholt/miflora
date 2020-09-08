@@ -8,6 +8,8 @@
 [![Plants healty and growing](https://img.shields.io/badge/plants-healthy%20and%20growing-green.svg)](https://github.com/basnijholt/miflora)
 [![GitHub license](https://img.shields.io/github/license/basnijholt/miflora.svg)](https://github.com/basnijholt/miflora/blob/master/LICENSE)
 
+> This repo used to live under the [open-homeautomation/miflora](https://github.com/open-homeautomation/miflora) namespace and was originally created by [@open-homeautomation](https://github.com/open-homeautomation).
+
 This library lets you read sensor data from a Xiaomi Mi Flora plant sensor.
 
 * Latest release download: https://pypi.python.org/pypi/miflora
