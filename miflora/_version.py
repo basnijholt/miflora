@@ -1,3 +1,4 @@
+# pylint: skip-file
 # This file is part of 'miniver': https://github.com/jbweston/miniver
 #
 import os
