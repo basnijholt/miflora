@@ -10,3 +10,6 @@ if sys.version_info <= (3, 6):
             sys.version_info.major, sys.version_info.minor, sys.executable
         )
     )
+from ._version import __version__
+
+__all__ = ["__version__"]
