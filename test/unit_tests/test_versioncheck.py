@@ -2,12 +2,13 @@
 
 Tests that an execption is thrown when loading the class in Python version <3.4
 """
-import unittest
 import sys
+import unittest
 
 
 class TestVersioncheck(unittest.TestCase):
     """Tests for the python version check."""
+
     MIN_SUPPORTED_VERSION = (3, 4)
 
     def test_py2(self):
@@ -16,9 +17,10 @@ class TestVersioncheck(unittest.TestCase):
             return
         try:
             import miflora  # noqa: F401 # pylint: disable=unused-import
-            self.fail('Should have thrown an exception')
+
+            self.fail("Should have thrown an exception")
         except ValueError as val_err:
-            self.assertIn('version', str(val_err))
+            self.assertIn("version", str(val_err))
 
     def test_py3(self):
         """Make sure newer python versions do not throw an exception."""

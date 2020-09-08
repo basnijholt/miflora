@@ -2,9 +2,10 @@
 
 Just use a different backend.
 """
+from test import HANDLE_READ_NAME, TEST_MAC
 from test.integration_tests.test_gatttool_backend import TestGatttoolBackend
-from test import TEST_MAC, HANDLE_READ_NAME
-from btlewrap import bluepy, BluetoothBackendException
+
+from btlewrap import BluetoothBackendException, bluepy
 
 
 class TestBluepyBackend(TestGatttoolBackend):

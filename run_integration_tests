@@ -1,11 +1,11 @@
 #!/bin/bash
 # simple script to run the integration tests
-# 
+#
 # - tests need to run as root so we can scan for new devices
 # - store the mac address of the device you're using in a file
 #   called ".test_mac" so you can run the test with one call.
 
-MAC=`cat .test_mac` 
+MAC=`cat .test_mac`
 
 if [ $# -eq 0 ]; then
     SUITE=test/integration_tests
@@ -16,4 +16,3 @@ TOX=$(which tox)
 sudo ${TOX} -e integration_tests -- --mac=$MAC $SUITE
 # clean up the file system permissions after running the tests as root
 sudo chown -R $UID .cache .tox .pytest_cache
-
