@@ -1,5 +1,5 @@
 # Build status:
-![GitHub Actions](https://github.com/basnijholt/miflora/workflows/tox/badge.svg)
+[![GitHub Actions](https://github.com/basnijholt/miflora/workflows/tox/badge.svg)](https://github.com/basnijholt/miflora/actions)
 [![Coverage Status](https://coveralls.io/repos/github/basnijholt/miflora/badge.svg?branch=master)](https://coveralls.io/github/basnijholt/miflora?branch=master)
 
 # Testing
