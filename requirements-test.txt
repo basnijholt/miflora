@@ -1,6 +1,6 @@
 pytest
 pytest-cov
 pytest-timeout
-pylint==2.3.1
+pylint==2.6.0
 flake8
 pexpect
