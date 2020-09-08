@@ -47,11 +47,11 @@ poller = MiFloraPoller("some mac address", BluepyBackend)
 This is the backend library to be used.
 
 ### bluez/gatttool wrapper (deprecated)
-:warning: The bluez team makred gatttool as deprecated. This solution may still work on some Linux distributions, but it is not recommended any more.
+:warning: The bluez team marked gatttool as deprecated. This solution may still work on some Linux distributions, but it is not recommended any more.
 
 To use the bluez wrapper, you need to install the bluez tools on your machine. No additional python
-libraries are required. Some distrubutions moved the gatttool binary to a separate package. Make sure you have this
-binaray available on your machine.
+libraries are required. Some distributions moved the gatttool binary to a separate package. Make sure you have this
+binary available on your machine.
 
 Example to use the bluez/gatttool wrapper:
 ```python
@@ -88,7 +88,7 @@ Users frequently have problems with the communication between their Bluetooth do
 While the battery usually lasts about a year indoor, it may also fail for unknown reasons before that. So the first thing to check if the battery is still good: take out the battery, wait 3 secs and put it back in. The light on the sensor should be flashing. If it is not: get a new battery.
 
 ### Range
-The distance between Bluteooth dongle and sensor should be less than 5 meters. Try moving the sensor and dongle closer together and see if that solves the problem. If range is an issue, there are a few proxies/relays via MQTT available:
+The distance between Bluetooth dongle and sensor should be less than 5 meters. Try moving the sensor and dongle closer together and see if that solves the problem. If range is an issue, there are a few proxies/relays via MQTT available:
 * Linux
   * [plantgateway](https://github.com/ChristianKuehnel/plantgateway)
   * [miflora-mqtt-daemon](https://github.com/ThomDietrich/miflora-mqtt-daemon)
@@ -102,7 +102,7 @@ If you're operating your sensors outside, make sure the sensor is protected agai
 The Bluetooth LE communication is not always reliable. There might be outages due to other radio interferences. The standard solution is to try again or poll your sensor more often that you really need it. It's also the hardest issue to analyse and debug.
 
 ### Raspberry Pi
-If you're using a Rapsberry Pi, make sure, that you OS is up to date, including the latest kernel and firmware. There are sometimes useful Bluetooth fixes. Also make sure that you have a good power supply (3 A recommended) as this causes sporadic problems in many places.
+If you're using a Raspberry Pi, make sure, that you OS is up to date, including the latest kernel and firmware. There are sometimes useful Bluetooth fixes. Also make sure that you have a good power supply (3 A recommended) as this causes sporadic problems in many places.
 
 ## Conttributing
 please have a look at [CONTRIBUTING.md](CONTRIBUTING.md)
