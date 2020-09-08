@@ -14,5 +14,9 @@ These unit tests are run on GitHub Actions.
 
 ## integration tests
 These tests depend on the presence of the real Xiaomi Mi sensors and a Bluteooth LE dongle.
-To run these tests call 'tox -e integration_tests -- --mac=<mac of your sensor>'. These test are NOT run on
+To run these tests call
+```bash
+tox -e integration_tests -- --mac=<mac of your sensor>
+```
+These test are NOT run on
 the GitHub Actions CI, as they require additional hardware.
