@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/miflora.svg)](https://pypi.python.org/pypi/miflora)
 [![PyPI](https://img.shields.io/pypi/status/miflora.svg)](https://pypi.python.org/pypi/miflora)
 [![PyPI](https://img.shields.io/pypi/format/miflora.svg)](https://pypi.python.org/pypi/miflora)
-![GitHub Actions](https://github.com/open-homeautomation/miflora/workflows/tox/badge.svg)
+[![GitHub Actions](https://github.com/open-homeautomation/miflora/workflows/tox/badge.svg)](https://github.com/open-homeautomation/miflora/actions)
 [![Coveralls github](https://img.shields.io/coveralls/github/open-homeautomation/miflora.svg)](https://coveralls.io/github/open-homeautomation/miflora)
 [![Plants healty and growing](https://img.shields.io/badge/plants-healthy%20and%20growing-green.svg)](https://github.com/open-homeautomation/miflora)
 [![GitHub license](https://img.shields.io/github/license/open-homeautomation/miflora.svg)](https://github.com/open-homeautomation/miflora/blob/master/LICENSE)
@@ -11,7 +11,7 @@
 This library lets you read sensor data from a Xiaomi Mi Flora plant sensor.
 
 * Latest release download: https://pypi.python.org/pypi/miflora
-* Build status: https://travis-ci.org/open-homeautomation/miflora
+* Build status: https://github.com/open-homeautomation/miflora/actions
 * Test coverage: https://coveralls.io/github/open-homeautomation/miflora
 
 ## Functionality
@@ -93,7 +93,7 @@ The distance between Bluetooth dongle and sensor should be less than 5 meters. T
   * [plantgateway](https://github.com/ChristianKuehnel/plantgateway)
   * [miflora-mqtt-daemon](https://github.com/ThomDietrich/miflora-mqtt-daemon)
 * ESP32
-  * [flora ](https://github.com/sidddy/flora)
+  * [flora](https://github.com/sidddy/flora)
 
 ### Outside
 If you're operating your sensors outside, make sure the sensor is protected against rain. The power of the battery is decreasing blow -10°C. Sou you might not get readings at that temperature. Also make sure that you have a Bluetooth dongle close by.
