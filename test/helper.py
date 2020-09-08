@@ -1,8 +1,13 @@
 """Helper functions for unit tests."""
 from struct import unpack
-
-from test import HANDLE_READ_NAME, HANDLE_READ_SENSOR_DATA, HANDLE_READ_VERSION_BATTERY, HANDLE_HISTORY_CONTROL, \
-    HANDLE_HISTORY_READ, HANDLE_DEVICE_TIME
+from test import (
+    HANDLE_DEVICE_TIME,
+    HANDLE_HISTORY_CONTROL,
+    HANDLE_HISTORY_READ,
+    HANDLE_READ_NAME,
+    HANDLE_READ_SENSOR_DATA,
+    HANDLE_READ_VERSION_BATTERY,
+)
 
 from btlewrap.base import AbstractBackend, BluetoothBackendException
 
@@ -16,11 +21,11 @@ class MockBackend(AbstractBackend):
     makes sensor to also test against a real sensor.
     """
 
-    def __init__(self, adapter: str = 'hci0', *, address_type: str):
-        super(MockBackend, self).__init__(adapter, address_type)
+    def __init__(self, adapter: str = "hci0", *, address_type: str):
+        super().__init__(adapter, address_type)
         self._address_type = address_type
         self._version = (0, 0, 0)
-        self.name = ''
+        self.name = ""
         self.battery_level = 0
         self.temperature = 0.0
         self.brightness = 0
@@ -52,7 +57,7 @@ class MockBackend(AbstractBackend):
     @property
     def version(self):
         """Get the stored version number as string."""
-        return '{}.{}.{}'.format(*self._version)
+        return "{}.{}.{}".format(*self._version)
 
     def read_handle(self, handle):
         """Read one of the handles that are implemented."""
@@ -71,7 +76,7 @@ class MockBackend(AbstractBackend):
             return self._read_history()
         elif handle == HANDLE_DEVICE_TIME:
             return self.local_time
-        raise ValueError('handle not implemented in mockup')
+        raise ValueError("handle not implemented in mockup")
 
     def write_handle(self, handle, value):
         """Writing handles just stores the results in a list."""
@@ -93,7 +98,7 @@ class MockBackend(AbstractBackend):
         """Recreate sensor data from the fields of this class."""
         if self._handle_0x35_raw_set:
             return self._handle_0x35_raw
-        result = [0xFE]*16
+        result = [0xFE] * 16
         temp = int(self.temperature * 10)
         result[0] = int(temp % 256)
         result[1] = int(temp / 256)
@@ -163,13 +168,13 @@ class MockBackend(AbstractBackend):
         # pylint: disable=no-else-return
 
         if self.history_data is None:
-            raise ValueError('history not set')
-        (cmd, index,) = unpack('<Bh', self._history_control)
+            raise ValueError("history not set")
+        (cmd, index,) = unpack("<Bh", self._history_control)
         if cmd == 0xA0:
             return self.history_info
         elif cmd == 0xA1:
             return self.history_data[index]
-        raise ValueError('Unknown command {}'.format(cmd))
+        raise ValueError(f"Unknown command {cmd}")
 
 
 class ConnectExceptionBackend(AbstractBackend):
@@ -177,7 +182,7 @@ class ConnectExceptionBackend(AbstractBackend):
 
     def connect(self, mac):
         """Raise exception when connecting."""
-        raise BluetoothBackendException('always raising exceptions')
+        raise BluetoothBackendException("always raising exceptions")
 
     def disconnect(self):
         """Disconnect always works"""
@@ -202,8 +207,8 @@ class RWExceptionBackend(AbstractBackend):
 
     def read_handle(self, _):
         """Reading always fails."""
-        raise BluetoothBackendException('always raising')
+        raise BluetoothBackendException("always raising")
 
     def read_write(self, *_):  # pylint: disable=no-self-use
         """Writing always fails."""
-        raise BluetoothBackendException('always raising')
+        raise BluetoothBackendException("always raising")
