@@ -3,7 +3,6 @@
 [![PyPI](https://img.shields.io/pypi/v/miflora.svg)](https://pypi.python.org/pypi/miflora)
 [![PyPI](https://img.shields.io/pypi/status/miflora.svg)](https://pypi.python.org/pypi/miflora)
 [![PyPI](https://img.shields.io/pypi/format/miflora.svg)](https://pypi.python.org/pypi/miflora)
-[![Travis](https://img.shields.io/travis/open-homeautomation/miflora.svg)](https://travis-ci.org/open-homeautomation/miflora)
 ![GitHub Actions](https://github.com/open-homeautomation/miflora/workflows/tox/badge.svg)
 [![Coveralls github](https://img.shields.io/coveralls/github/open-homeautomation/miflora.svg)](https://coveralls.io/github/open-homeautomation/miflora)
 [![Plants healty and growing](https://img.shields.io/badge/plants-healthy%20and%20growing-green.svg)](https://github.com/open-homeautomation/miflora)
