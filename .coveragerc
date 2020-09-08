@@ -4,6 +4,8 @@ source = miflora
 omit =
     miflora/backends/bluepy.py
     miflora/backends/pygatt.py
+    miflora/_static_version.py
+    miflora/_version.py
 
 [report]
 exclude_lines =
