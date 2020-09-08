@@ -53,7 +53,7 @@ class MiFloraPoller:
     A class to read data from Mi Flora plant sensors.
     """
 
-    def __init__(self, mac, backend, cache_timeout=600, retries=3, adapter="hci0"):
+    def __init__(self, mac, backend, cache_timeout=600, adapter="hci0"):
         """
         Initialize a Mi Flora Poller for the given MAC address.
         """
@@ -64,8 +64,6 @@ class MiFloraPoller:
         self._cache_timeout = timedelta(seconds=cache_timeout)
         self._last_read = None
         self._fw_last_read = None
-        self.retries = retries
-        self.ble_timeout = 10
         self.lock = Lock()
         self._firmware_version = None
         self.battery = None

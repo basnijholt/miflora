@@ -211,7 +211,7 @@ class TestMifloraPoller(unittest.TestCase):
 
     def test_connect_exception(self):
         """Test reaction when getting a BluetoothBackendException."""
-        poller = MiFloraPoller(self.TEST_MAC, ConnectExceptionBackend, retries=0)
+        poller = MiFloraPoller(self.TEST_MAC, ConnectExceptionBackend)
         with self.assertRaises(BluetoothBackendException):
             poller.firmware_version()
         with self.assertRaises(BluetoothBackendException):
@@ -223,7 +223,7 @@ class TestMifloraPoller(unittest.TestCase):
 
     def test_rw_exception(self):
         """Test reaction when getting a BluetoothBackendException."""
-        poller = MiFloraPoller(self.TEST_MAC, RWExceptionBackend, retries=0)
+        poller = MiFloraPoller(self.TEST_MAC, RWExceptionBackend)
         with self.assertRaises(BluetoothBackendException):
             poller.firmware_version()
         with self.assertRaises(BluetoothBackendException):
