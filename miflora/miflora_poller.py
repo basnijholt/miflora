@@ -365,10 +365,10 @@ class HistoryEntry:  # pylint: disable=too-few-public-methods
         if temp_bytes[1] & 0x80 > 0:
             temp_bytes = [temp_bytes[0] ^ 0xFF, temp_bytes[1] ^ 0xFF]
 
-        (self.device_time,) = (int.from_bytes(byte_array[:4], BYTEORDER),)
-        (self.temperature,) = (int.from_bytes(temp_bytes, BYTEORDER) / 10.0,)
-        (self.light,) = (int.from_bytes(byte_array[7:10], BYTEORDER),)
-        (self.moisture,) = (byte_array[11],)
+        self.device_time = int.from_bytes(byte_array[:4], BYTEORDER)
+        self.temperature = int.from_bytes(temp_bytes, BYTEORDER) / 10.0
+        self.light = int.from_bytes(byte_array[7:10], BYTEORDER)
+        self.moisture = byte_array[11]
         self.conductivity = int.from_bytes(byte_array[12:14], BYTEORDER)
 
         _LOGGER.debug("Raw data for char 0x3c: %s", format_bytes(byte_array))
