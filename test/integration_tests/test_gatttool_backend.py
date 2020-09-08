@@ -1,12 +1,14 @@
 """Test GatttoolBackend with real sensor."""
 import unittest
-from test import HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, DATA_MODE_CHANGE, TEST_MAC
+from test import DATA_MODE_CHANGE, HANDLE_READ_NAME, HANDLE_WRITE_MODE_CHANGE, TEST_MAC
+
 import pytest
 from btlewrap import BluetoothBackendException, GatttoolBackend
 
 
 class TestGatttoolBackend(unittest.TestCase):
     """Test GatttoolBackend with real sensor."""
+
     # pylint does not understand pytest fixtures, so we have to disable the warning
     # pylint: disable=no-member
 

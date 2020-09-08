@@ -1,14 +1,23 @@
 """End to End test cases for MiFlora."""
 import unittest
+
 import pytest
-from btlewrap.gatttool import GatttoolBackend
 from btlewrap.bluepy import BluepyBackend
-from miflora.miflora_poller import (MiFloraPoller, MI_CONDUCTIVITY,
-                                    MI_MOISTURE, MI_LIGHT, MI_TEMPERATURE, MI_BATTERY)
+from btlewrap.gatttool import GatttoolBackend
+
+from miflora.miflora_poller import (
+    MI_BATTERY,
+    MI_CONDUCTIVITY,
+    MI_LIGHT,
+    MI_MOISTURE,
+    MI_TEMPERATURE,
+    MiFloraPoller,
+)
 
 
 class TestEverythingGatt(unittest.TestCase):
     """End to End test cases for MiFlora."""
+
     # pylint does not understand pytest fixtures, so we have to disable the warning
     # pylint: disable=no-member
 
