@@ -42,7 +42,7 @@ Example to use the bluepy backend:
 from miflora.miflora_poller import MiFloraPoller
 from btlewrap.bluepy import BluepyBackend
 
-poller = MiFloraPoller('some mac address', BluepyBackend)
+poller = MiFloraPoller("some mac address", BluepyBackend)
 ```
 This is the backend library to be used.
 
@@ -58,7 +58,7 @@ Example to use the bluez/gatttool wrapper:
 from miflora.miflora_poller import MiFloraPoller
 from btlewrap.gatttool import GatttoolBackend
 
-poller = MiFloraPoller('some mac address', GatttoolBackend)
+poller = MiFloraPoller("some mac address", GatttoolBackend)
 ```
 
 This backend should only be used, if your platform is not supported by bluepy.
@@ -73,7 +73,7 @@ Example to use the pygatt backend:
 from miflora.miflora_poller import MiFloraPoller
 from btlewrap.pygatt import PygattBackend
 
-poller = MiFloraPoller('some mac address', PygattBackend)
+poller = MiFloraPoller("some mac address", PygattBackend)
 ```
 ## Dependencies
 miflora depends on the [btlewrap](https://github.com/ChristianKuehnel/btlewrap) library. If you install miflora via PIP btlewrap will automatically be installed. If not, you will have to install btlewrap manually:
