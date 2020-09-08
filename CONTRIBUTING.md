@@ -1,6 +1,6 @@
 # Build status:
-![GitHub Actions](https://github.com/open-homeautomation/miflora/workflows/tox/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/open-homeautomation/miflora/badge.svg?branch=master)](https://coveralls.io/github/open-homeautomation/miflora?branch=master)
+![GitHub Actions](https://github.com/basnijholt/miflora/workflows/tox/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/basnijholt/miflora/badge.svg?branch=master)](https://coveralls.io/github/basnijholt/miflora?branch=master)
 
 # Testing
 The project uses [tox](https://tox.readthedocs.io/en/latest/) for automated testing and dependency mangement and

@@ -3,16 +3,16 @@
 [![PyPI](https://img.shields.io/pypi/v/miflora.svg)](https://pypi.python.org/pypi/miflora)
 [![PyPI](https://img.shields.io/pypi/status/miflora.svg)](https://pypi.python.org/pypi/miflora)
 [![PyPI](https://img.shields.io/pypi/format/miflora.svg)](https://pypi.python.org/pypi/miflora)
-[![GitHub Actions](https://github.com/open-homeautomation/miflora/workflows/tox/badge.svg)](https://github.com/open-homeautomation/miflora/actions)
-[![Coveralls github](https://img.shields.io/coveralls/github/open-homeautomation/miflora.svg)](https://coveralls.io/github/open-homeautomation/miflora)
-[![Plants healty and growing](https://img.shields.io/badge/plants-healthy%20and%20growing-green.svg)](https://github.com/open-homeautomation/miflora)
-[![GitHub license](https://img.shields.io/github/license/open-homeautomation/miflora.svg)](https://github.com/open-homeautomation/miflora/blob/master/LICENSE)
+[![GitHub Actions](https://github.com/basnijholt/miflora/workflows/tox/badge.svg)](https://github.com/basnijholt/miflora/actions)
+[![Coveralls github](https://img.shields.io/coveralls/github/basnijholt/miflora.svg)](https://coveralls.io/github/basnijholt/miflora)
+[![Plants healty and growing](https://img.shields.io/badge/plants-healthy%20and%20growing-green.svg)](https://github.com/basnijholt/miflora)
+[![GitHub license](https://img.shields.io/github/license/basnijholt/miflora.svg)](https://github.com/basnijholt/miflora/blob/master/LICENSE)
 
 This library lets you read sensor data from a Xiaomi Mi Flora plant sensor.
 
 * Latest release download: https://pypi.python.org/pypi/miflora
-* Build status: https://github.com/open-homeautomation/miflora/actions
-* Test coverage: https://coveralls.io/github/open-homeautomation/miflora
+* Build status: https://github.com/basnijholt/miflora/actions
+* Test coverage: https://coveralls.io/github/basnijholt/miflora
 
 ## Functionality
 It supports reading the different measurements from the sensor

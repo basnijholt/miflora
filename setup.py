@@ -32,7 +32,7 @@ setup(
     description="Library to read data from Mi Flora sensor",
     long_description=readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/open-homeautomation/miflora",
+    url="https://github.com/basnijholt/miflora",
     author="Daniel Matuschek",
     author_email="daniel@matuschek.net",
     license="MIT",
