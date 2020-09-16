@@ -169,7 +169,7 @@ class MockBackend(AbstractBackend):
 
         if self.history_data is None:
             raise ValueError("history not set")
-        (cmd, index,) = unpack("<Bh", self._history_control)
+        (cmd, index) = unpack("<Bh", self._history_control)
         if cmd == 0xA0:
             return self.history_info
         elif cmd == 0xA1:
