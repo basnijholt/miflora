@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 def readme():
     """Load the readme file."""
-    with open("README.md", "r") as readme_file:
+    with open("README.md") as readme_file:
         return readme_file.read()
 
 

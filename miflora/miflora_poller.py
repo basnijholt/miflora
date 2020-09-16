@@ -49,9 +49,7 @@ def format_bytes(raw_data):
 
 
 class MiFloraPoller:
-    """"
-    A class to read data from Mi Flora plant sensors.
-    """
+    """A class to read data from Mi Flora plant sensors."""
 
     def __init__(self, mac, backend, cache_timeout=600, adapter="hci0"):
         """

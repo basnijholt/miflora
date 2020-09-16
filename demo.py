@@ -35,8 +35,8 @@ def poll(args):
     backend = _get_backend(args)
     poller = MiFloraPoller(args.mac, backend)
     print("Getting data from Mi Flora")
-    print("FW: {}".format(poller.firmware_version()))
-    print("Name: {}".format(poller.name()))
+    print(f"FW: {poller.firmware_version()}")
+    print(f"Name: {poller.name()}")
     print("Temperature: {}".format(poller.parameter_value(MI_TEMPERATURE)))
     print("Moisture: {}".format(poller.parameter_value(MI_MOISTURE)))
     print("Light: {}".format(poller.parameter_value(MI_LIGHT)))
@@ -106,7 +106,7 @@ def main():
         "--backend", choices=["gatttool", "bluepy", "pygatt"], default="gatttool"
     )
     parser.add_argument("-v", "--verbose", action="store_const", const=True)
-    subparsers = parser.add_subparsers(help="sub-command help",)
+    subparsers = parser.add_subparsers(help="sub-command help")
 
     parser_poll = subparsers.add_parser("poll", help="poll data from a sensor")
     parser_poll.add_argument("mac", type=valid_miflora_mac)
