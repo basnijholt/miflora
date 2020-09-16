@@ -35,6 +35,8 @@ setup(
     url="https://github.com/basnijholt/miflora",
     author="Daniel Matuschek",
     author_email="daniel@matuschek.net",
+    maintainer="Bas Nijholt",
+    maintainer_email="bas@nijho.lt",
     license="MIT",
     python_requires=">=3.6",
     classifiers=[
