@@ -20,7 +20,7 @@ from miflora.miflora_poller import (
 
 
 def valid_miflora_mac(
-    mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")
+    mac, pat=re.compile(r"(80:EA:CA)|(C4:7C:8D):[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")
 ):
     """Check for valid mac adresses."""
     if not pat.match(mac.upper()):
