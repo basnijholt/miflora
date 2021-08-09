@@ -49,7 +49,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    packages=find_packages(),
+    packages=find_packages(exclude=["test", "test.*"]),
     keywords="plant sensor bluetooth low-energy ble",
     zip_safe=False,
     install_requires=["btlewrap==0.0.10"],
