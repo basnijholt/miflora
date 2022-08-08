@@ -104,6 +104,7 @@ class MiFloraPoller:
                         datetime.now() - self._cache_timeout + timedelta(seconds=300)
                     )
                     return
+            time.sleep(1) # without this, the previous write_handle is done after we read the data
             self._cache = connection.read_handle(
                 _HANDLE_READ_SENSOR_DATA
             )  # pylint: disable=no-member
@@ -200,10 +201,13 @@ class MiFloraPoller:
         if self._cache[7] > 100:  # moisture over 100 procent
             self.clear_cache()
             return
-        if self._firmware_version >= "2.6.6":
-            if sum(self._cache[10:]) == 0:
-                self.clear_cache()
-                return
+        # I have no idea why this exists? ( Mi Flora Max Data: B6 00 63 00 00 00 00 38 8D 02 00 00 00 00 00 00 ) 
+        # With this cleaning, the cache is always empty.
+        
+        #if self._firmware_version >= "2.6.6":
+        #    if sum(self._cache[10:]) == 0: 
+        #        self.clear_cache()
+        #        return
         if sum(self._cache) == 0:
             self.clear_cache()
             return
